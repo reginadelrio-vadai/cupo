@@ -58,6 +58,41 @@ export const VALID_TIMEZONES = [
   'Europe/London',
 ] as const
 
+// Industries
+export const INDUSTRIES = [
+  { value: 'salud', label: 'Salud y bienestar' },
+  { value: 'belleza', label: 'Belleza y estética' },
+  { value: 'fitness', label: 'Fitness y deporte' },
+  { value: 'educacion', label: 'Educación y tutorías' },
+  { value: 'legal', label: 'Legal y consultoría' },
+  { value: 'tecnologia', label: 'Tecnología' },
+  { value: 'veterinaria', label: 'Veterinaria' },
+  { value: 'automotriz', label: 'Automotriz' },
+  { value: 'inmobiliaria', label: 'Inmobiliaria' },
+  { value: 'otro', label: 'Otro' },
+] as const
+
+// Service durations (minutes)
+export const DURATION_OPTIONS = [
+  { value: 15, label: '15 min' },
+  { value: 30, label: '30 min' },
+  { value: 45, label: '45 min' },
+  { value: 60, label: '1 hora' },
+  { value: 90, label: '1h 30min' },
+  { value: 120, label: '2 horas' },
+] as const
+
+// Days of week
+export const DAYS_OF_WEEK = [
+  { value: 1, label: 'Lunes', short: 'Lun' },
+  { value: 2, label: 'Martes', short: 'Mar' },
+  { value: 3, label: 'Miércoles', short: 'Mié' },
+  { value: 4, label: 'Jueves', short: 'Jue' },
+  { value: 5, label: 'Viernes', short: 'Vie' },
+  { value: 6, label: 'Sábado', short: 'Sáb' },
+  { value: 0, label: 'Domingo', short: 'Dom' },
+] as const
+
 // Rate limiting
 export const RATE_LIMIT_AGENT = { requests: 120, window: '1 m' } as const
 

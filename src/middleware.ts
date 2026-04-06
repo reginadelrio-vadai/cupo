@@ -42,7 +42,7 @@ export async function middleware(request: NextRequest) {
 
   // User authenticated but no organization → onboarding
   const orgId = user.app_metadata?.organization_id
-  if (!orgId && pathname !== '/onboarding' && pathname !== '/api/onboarding') {
+  if (!orgId && pathname !== '/onboarding' && !pathname.startsWith('/api/onboarding')) {
     const url = request.nextUrl.clone()
     url.pathname = '/onboarding'
     return NextResponse.redirect(url)
