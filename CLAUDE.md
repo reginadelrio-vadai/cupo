@@ -5,6 +5,86 @@ SaaS multi-tenant de agendamiento de citas. Negocios reciben citas por: booking 
 
 Arquitectura probada en producción con Menna Salud (citas.mennasalud.com).
 
+## Marca — CUPO (nombre de trabajo)
+
+### Logo
+Cuadrado redondeado (#00B8E6) con punto circular (#060608) centrado. Al lado el wordmark "cupo" en weight 500, letter-spacing 0.5px, color #E2E8F0 sobre dark o #0F172A sobre light.
+
+### Paleta de colores
+```
+Cyan eléctrico:    #00B8E6  — acento principal (landing, CTAs, links)
+Teal profundo:     #0891B2  — acento dashboard (badges, indicadores, botones secundarios)
+Verde menta:       #06D6A0  — gradients secundarios, éxito alternativo
+Navy oscuro:       #060608  — fondo landing
+Slate oscuro:      #0F172A  — texto principal (dashboard)
+Slate medio:       #475569  — texto secundario (landing)
+Slate claro:       #94A3B8  — labels, hints (dashboard)
+Snow:              #F8FAFC  — fondo dashboard
+Blanco:            #FFFFFF  — cards dashboard
+Border light:      #E2E8F0  — bordes en dashboard
+Éxito:             #10B981
+Error:             #EF4444
+Warning amber:     #F59E0B
+Warning text:      #D97706
+```
+
+### Dos ambientes visuales
+
+**Landing page (dark + bold):**
+- Fondo: #060608 con grain texture overlay (fractalNoise, opacity 0.3, mix-blend-mode overlay)
+- Motivo visual: arcos concéntricos en esquina (referencia reloj/tiempo) con border 0.5px rgba(0,184,230,0.04-0.07)
+- Dot grid decorativo: solo en una esquina, 5x3, opacity 0.25, placement asimétrico
+- Glass cards: background rgba(255,255,255,0.03), backdrop-filter blur(20px), border rgba(255,255,255,0.06)
+- Gradient text: linear-gradient(135deg, #00B8E6, #06D6A0) con -webkit-background-clip text
+- Botón primario: background #00B8E6, color #060608, border-radius 8px, font-weight 500
+- Tags/chips: border 0.5px solid rgba(8,145,178,0.25), con dot indicator (#00B8E6)
+- Tipografía: hero 34px weight 500 letter-spacing -1.2px, body 14px, labels 10px uppercase tracking 1.5px
+- Social proof: WhatsApp chat preview card mostrando al agente IA respondiendo en real-time
+
+**Dashboard (light + cómodo):**
+- Fondo: #F8FAFC
+- Gradient top bar: 2px height, linear-gradient(90deg, #00B8E6 0%, #0891B2 30%, #06D6A0 60%, transparent 100%)
+- Cards: background #FFFFFF, border 0.5px solid #E2E8F0, border-radius 10px
+- Hero metric card: 1.5fr width (asimétrico), gradient bottom-wash rgba(0,184,230,0.02), gradient bottom-bar 2px
+- Metrics: números 26-28px weight 500 letter-spacing -1px, labels 10px uppercase tracking 1px
+- Progress indicators: dots horizontales (no barras), coloreados vs grises
+- Mini ring chart SVG para porcentajes (no-show rate)
+- Timeline vertical para citas (NO tabla plana):
+  - Hora a la izquierda (44px min-width, text-align right)
+  - Línea vertical 2px con gradient por status: #0891B2→#06D6A0 (confirmada), #F59E0B→#EF4444 (pago pendiente), dashed #CBD5E1 (Google Cal), solid #F1F5F9 (disponible)
+  - Content a la derecha con nombre, servicio, profesional, duración
+  - Status badges: pill con background rgba del color al 0.06, text del color, border-radius 4px
+- Indicador "AHORA": dot 5px #00B8E6 con box-shadow glow, fondo rgba(0,184,230,0.03), label 10px uppercase
+- Source tags: "WhatsApp", "Booking page" — 11px color #94A3B8 con dot separator
+- Countdown en pagos pendientes: "expira en X min" en 9px #94A3B8
+- Google Calendar events: fondo rgba(0,0,0,0.01), línea dashed, texto #94A3B8, badge "Bloqueado"
+- Slots vacíos: border dashed #E2E8F0, "+ Agendar" en #94A3B8
+- Avatar/iniciales: border-radius 7px (no 50% redondo), gradient background 135deg #0891B2→#06D6A0
+- Separadores verticales: 1px height 14px #E2E8F0 entre elementos de header
+
+**Booking page (limpia, branding del negocio):**
+- Fondo blanco, bordes suaves, micro-animaciones en hover
+- Logo y colores del NEGOCIO (no de cupo): config.logo_url ?? org.logo_url, config.primary_color ?? org.primary_color
+- Cards de servicios: background #F8FAFC, border 0.5px solid #E2E8F0, border-radius 8px
+- Precios en color primary del negocio
+- Minimal — rápida de cargar, sin efectos pesados
+
+### Tipografía
+- Display/headings: font-family 'Geist', sans-serif (diseñada por Vercel) — instalar via next/font
+- UI/body: font-family 'Inter', sans-serif — instalar via next/font
+- Jerarquía: hero 34px/-1.2px, h1 28px/-1px, h2 22px/-0.5px, h3 16px, body 14px/1.7, labels 10-11px uppercase tracking 1-1.5px
+- Pesos: solo 400 (regular) y 500 (medium). NUNCA 600 ni 700.
+
+### Principios de diseño
+- Grids ASIMÉTRICOS — la metric principal más ancha (1.5fr vs 1fr), no todo 1:1:1
+- NO usar tablas planas para listas de citas — usar timeline vertical con líneas de status
+- Espacio negativo intencional — dejar respirar, no llenar todo
+- Color con propósito — cada color comunica un status, no es decorativo
+- Bordes 0.5px (no 1px ni 2px) — se ve más refinado
+- Border-radius: 10px cards, 8px botones, 6px inputs, 4px badges/pills
+- NO usar sombras (box-shadow) excepto para glow funcional (indicador AHORA)
+- Transiciones suaves en hover: opacity 0.8 o scale 0.98, 150ms ease
+
 ## Stack (versiones EXACTAS)
 - next: 14.2.x (NO 15.x)
 - react: 18.x · typescript: 5.x
