@@ -25,6 +25,7 @@ export interface Organization {
   phone: string | null
   email: string | null
   address: string | null
+  slot_granularity_minutes: number
   is_active: boolean
   created_at: string
   updated_at: string
