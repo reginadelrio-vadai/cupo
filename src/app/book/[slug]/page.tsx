@@ -55,7 +55,6 @@ export default async function BookingPage({ params }: Props) {
           slug={params.slug}
           services={services || []}
           primaryColor={primaryColor}
-          timezone={resolved.org.timezone}
         />
       </div>
     </div>

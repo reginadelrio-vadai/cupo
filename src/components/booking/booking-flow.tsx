@@ -6,7 +6,7 @@ import { es } from 'date-fns/locale'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { ChevronLeft, Check, Clock, User, Calendar as CalendarIcon, Loader2 } from 'lucide-react'
+import { ChevronLeft, Check, Clock, User, Calendar as CalendarIcon, Loader2, Users } from 'lucide-react'
 
 interface Service {
   id: string
@@ -36,10 +36,23 @@ interface Props {
   slug: string
   services: Service[]
   primaryColor: string
-  timezone: string
 }
 
+const COUNTRY_CODES = [
+  { code: '+52', country: 'MX', flag: '🇲🇽' },
+  { code: '+1', country: 'US', flag: '🇺🇸' },
+  { code: '+57', country: 'CO', flag: '🇨🇴' },
+  { code: '+51', country: 'PE', flag: '🇵🇪' },
+  { code: '+56', country: 'CL', flag: '🇨🇱' },
+  { code: '+54', country: 'AR', flag: '🇦🇷' },
+  { code: '+593', country: 'EC', flag: '🇪🇨' },
+  { code: '+504', country: 'HN', flag: '🇭🇳' },
+]
+
 type Step = 'service' | 'professional' | 'datetime' | 'client' | 'confirm' | 'success'
+
+// Sentinel for "any professional"
+const ANY_PROFESSIONAL: Professional = { id: '__any__', display_name: 'Cualquier profesional disponible', avatar_url: null }
 
 export function BookingFlow({ slug, services, primaryColor }: Props) {
   const [step, setStep] = useState<Step>('service')
@@ -50,6 +63,7 @@ export function BookingFlow({ slug, services, primaryColor }: Props) {
   const [professionals, setProfessionals] = useState<Professional[]>([])
   const [slots, setSlots] = useState<Slot[]>([])
   const [clientName, setClientName] = useState('')
+  const [countryCode, setCountryCode] = useState('+52')
   const [clientPhone, setClientPhone] = useState('')
   const [clientEmail, setClientEmail] = useState('')
   const [loading, setLoading] = useState(false)
@@ -58,7 +72,6 @@ export function BookingFlow({ slug, services, primaryColor }: Props) {
 
   const api = `/api/booking/${slug}`
 
-  // Step 1 → 2: Select service, load professionals
   async function selectService(service: Service) {
     setSelectedService(service)
     setLoading(true)
@@ -68,25 +81,27 @@ export function BookingFlow({ slug, services, primaryColor }: Props) {
     setLoading(false)
 
     if (data.data?.professionals?.length === 1) {
-      // Auto-select if only one professional
       selectProfessional(data.data.professionals[0], service)
     } else {
       setStep('professional')
     }
   }
 
-  // Step 2 → 3: Select professional, load availability
   async function selectProfessional(prof: Professional, svc?: Service) {
     setSelectedProfessional(prof)
     const service = svc || selectedService
     setStep('datetime')
-    await loadSlots(selectedDate, service!.id, prof.id)
+    // If "any" → don't pass professional_id so API returns all slots
+    const profParam = prof.id === '__any__' ? '' : prof.id
+    await loadSlots(selectedDate, service!.id, profParam)
   }
 
   async function loadSlots(date: string, serviceId: string, professionalId: string) {
     setLoading(true)
     setSlots([])
-    const res = await fetch(`${api}/availability?date=${date}&service_id=${serviceId}&professional_id=${professionalId}`)
+    let url = `${api}/availability?date=${date}&service_id=${serviceId}`
+    if (professionalId) url += `&professional_id=${professionalId}`
+    const res = await fetch(url)
     const data = await res.json()
     setSlots(data.data?.slots || [])
     setLoading(false)
@@ -96,11 +111,13 @@ export function BookingFlow({ slug, services, primaryColor }: Props) {
     setSelectedDate(date)
     setSelectedSlot(null)
     if (selectedService && selectedProfessional) {
-      await loadSlots(date, selectedService.id, selectedProfessional.id)
+      const profParam = selectedProfessional.id === '__any__' ? '' : selectedProfessional.id
+      await loadSlots(date, selectedService.id, profParam)
     }
   }
 
-  // Step 4: Submit booking
+  const fullPhone = `${countryCode}${clientPhone.replace(/\D/g, '')}`
+
   async function handleBook() {
     setError(null)
     if (!clientName.trim() || !clientPhone.trim()) {
@@ -109,16 +126,19 @@ export function BookingFlow({ slug, services, primaryColor }: Props) {
     }
     setLoading(true)
 
+    // Use the slot's professional_id (assigned by availability engine) for "any" selection
+    const bookProfId = selectedSlot!.professional_id
+
     const res = await fetch(`${api}/book`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         service_id: selectedService!.id,
-        professional_id: selectedProfessional!.id,
+        professional_id: bookProfId,
         start_time: selectedSlot!.start,
         client: {
           full_name: clientName.trim(),
-          phone: clientPhone.trim(),
+          phone: fullPhone,
           email: clientEmail.trim() || undefined,
         },
       }),
@@ -143,36 +163,31 @@ export function BookingFlow({ slug, services, primaryColor }: Props) {
     else if (step === 'confirm') setStep('client')
   }
 
-  // Generate next 7 days for date picker
   const dates = Array.from({ length: 14 }, (_, i) => {
     const d = addDays(new Date(), i)
     return { value: format(d, 'yyyy-MM-dd'), label: format(d, 'EEE d', { locale: es }) }
   })
 
-  const formatTime = (iso: string) => {
-    const d = new Date(iso)
-    return format(d, 'HH:mm')
-  }
+  const formatTime = (iso: string) => format(new Date(iso), 'HH:mm')
 
-  const formatPrice = (price: number, currency: string) => {
-    return new Intl.NumberFormat('es-MX', { style: 'currency', currency }).format(price)
-  }
+  const formatPrice = (price: number, currency: string) =>
+    new Intl.NumberFormat('es-MX', { style: 'currency', currency }).format(price)
 
-  // ============================================================
-  // RENDER
-  // ============================================================
+  // Professional display name for confirmation/success (resolve from slot if "any")
+  const displayProfName = selectedProfessional?.id === '__any__'
+    ? selectedSlot?.professional_name || 'Profesional asignado'
+    : selectedProfessional?.display_name || ''
 
-  // Back button
   const BackButton = step !== 'service' && step !== 'success' ? (
     <button
       onClick={goBack}
-      className="flex items-center gap-1 text-sm text-[#475569] mb-4 hover:text-[#0F172A] transition-colors"
+      className="flex items-center gap-1 text-sm text-[#475569] mb-4 hover:text-[#0F172A] transition-colors duration-150"
     >
       <ChevronLeft className="h-4 w-4" /> Atrás
     </button>
   ) : null
 
-  // STEP: Service selection
+  // ── SERVICE ──
   if (step === 'service') {
     return (
       <div className="space-y-3">
@@ -181,19 +196,17 @@ export function BookingFlow({ slug, services, primaryColor }: Props) {
           <button
             key={svc.id}
             onClick={() => selectService(svc)}
-            className="w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] p-4 text-left transition-colors hover:border-[#CBD5E1]"
+            className="w-full rounded-[10px] border-[0.5px] border-[#E2E8F0] bg-[#F8FAFC] p-4 text-left transition-all duration-150 hover:border-[#CBD5E1] hover:scale-[0.99]"
           >
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-[#0F172A]">{svc.name}</p>
-                {svc.description && (
-                  <p className="mt-0.5 text-xs text-[#94A3B8]">{svc.description}</p>
-                )}
+                {svc.description && <p className="mt-0.5 text-xs text-[#94A3B8]">{svc.description}</p>}
                 <div className="mt-1.5 flex items-center gap-2 text-xs text-[#94A3B8]">
                   <Clock className="h-3 w-3" />
                   <span>{svc.duration_minutes} min</span>
                   {svc.is_virtual && (
-                    <span className="rounded-full bg-[#0891B2]/10 px-2 py-0.5 text-[#0891B2]">Virtual</span>
+                    <span className="rounded-[4px] bg-[#0891B2]/[0.06] px-2 py-0.5 text-[#0891B2]">Virtual</span>
                   )}
                 </div>
               </div>
@@ -210,7 +223,7 @@ export function BookingFlow({ slug, services, primaryColor }: Props) {
     )
   }
 
-  // STEP: Professional selection
+  // ── PROFESSIONAL ──
   if (step === 'professional') {
     return (
       <div className="space-y-3">
@@ -219,42 +232,58 @@ export function BookingFlow({ slug, services, primaryColor }: Props) {
         {loading ? (
           <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-[#94A3B8]" /></div>
         ) : (
-          professionals.map((prof) => (
+          <>
+            {/* "Any professional" option */}
             <button
-              key={prof.id}
-              onClick={() => selectProfessional(prof)}
-              className="w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] p-4 text-left transition-colors hover:border-[#CBD5E1]"
+              onClick={() => selectProfessional(ANY_PROFESSIONAL)}
+              className="w-full rounded-[10px] border-[0.5px] border-[#E2E8F0] bg-[#F8FAFC] p-4 text-left transition-all duration-150 hover:border-[#CBD5E1] hover:scale-[0.99]"
             >
               <div className="flex items-center gap-3">
-                <div
-                  className="flex h-9 w-9 items-center justify-center rounded-[7px] text-xs font-medium text-white"
-                  style={{ background: `linear-gradient(135deg, #0891B2, #06D6A0)` }}
-                >
-                  {prof.display_name[0]?.toUpperCase()}
+                <div className="flex h-9 w-9 items-center justify-center rounded-[7px] bg-[#E2E8F0]">
+                  <Users className="h-4 w-4 text-[#94A3B8]" />
                 </div>
-                <span className="text-sm font-medium text-[#0F172A]">{prof.display_name}</span>
+                <div>
+                  <span className="text-sm font-medium text-[#0F172A]">Cualquier profesional</span>
+                  <p className="text-[11px] text-[#94A3B8]">Te asignamos al primero disponible</p>
+                </div>
               </div>
             </button>
-          ))
+            {professionals.map((prof) => (
+              <button
+                key={prof.id}
+                onClick={() => selectProfessional(prof)}
+                className="w-full rounded-[10px] border-[0.5px] border-[#E2E8F0] bg-[#F8FAFC] p-4 text-left transition-all duration-150 hover:border-[#CBD5E1] hover:scale-[0.99]"
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    className="flex h-9 w-9 items-center justify-center rounded-[7px] text-xs font-medium text-white"
+                    style={{ background: 'linear-gradient(135deg, #0891B2, #06D6A0)' }}
+                  >
+                    {prof.display_name[0]?.toUpperCase()}
+                  </div>
+                  <span className="text-sm font-medium text-[#0F172A]">{prof.display_name}</span>
+                </div>
+              </button>
+            ))}
+          </>
         )}
       </div>
     )
   }
 
-  // STEP: Date & time selection
+  // ── DATE & TIME ──
   if (step === 'datetime') {
     return (
       <div className="space-y-4">
         {BackButton}
         <h2 className="text-base font-medium text-[#0F172A]">Elige fecha y hora</h2>
 
-        {/* Date scroll */}
         <div className="flex gap-2 overflow-x-auto pb-2">
           {dates.map((d) => (
             <button
               key={d.value}
               onClick={() => changeDate(d.value)}
-              className="flex-shrink-0 rounded-lg border px-3 py-2 text-center text-xs transition-colors"
+              className="flex-shrink-0 rounded-[8px] border-[0.5px] px-3 py-2 text-center text-xs transition-colors duration-150"
               style={{
                 borderColor: selectedDate === d.value ? primaryColor : '#E2E8F0',
                 background: selectedDate === d.value ? `${primaryColor}10` : 'transparent',
@@ -266,7 +295,6 @@ export function BookingFlow({ slug, services, primaryColor }: Props) {
           ))}
         </div>
 
-        {/* Time slots */}
         {loading ? (
           <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-[#94A3B8]" /></div>
         ) : slots.length > 0 ? (
@@ -275,7 +303,7 @@ export function BookingFlow({ slug, services, primaryColor }: Props) {
               <button
                 key={slot.start}
                 onClick={() => { setSelectedSlot(slot); setStep('client') }}
-                className="rounded-lg border py-2.5 text-center text-sm transition-colors"
+                className="rounded-[8px] border-[0.5px] py-2.5 text-center text-sm transition-all duration-150 hover:scale-[0.98]"
                 style={{
                   borderColor: selectedSlot?.start === slot.start ? primaryColor : '#E2E8F0',
                   background: selectedSlot?.start === slot.start ? `${primaryColor}10` : 'transparent',
@@ -295,7 +323,7 @@ export function BookingFlow({ slug, services, primaryColor }: Props) {
     )
   }
 
-  // STEP: Client info
+  // ── CLIENT INFO ──
   if (step === 'client') {
     return (
       <div className="space-y-4">
@@ -305,33 +333,35 @@ export function BookingFlow({ slug, services, primaryColor }: Props) {
         <div className="space-y-3">
           <div className="space-y-1.5">
             <Label className="text-[11px] uppercase tracking-[1.5px] text-[#94A3B8]">Nombre completo</Label>
-            <Input
-              placeholder="Tu nombre"
-              value={clientName}
-              onChange={(e) => setClientName(e.target.value)}
-              required
-            />
+            <Input placeholder="Tu nombre" value={clientName} onChange={(e) => setClientName(e.target.value)} required />
           </div>
           <div className="space-y-1.5">
             <Label className="text-[11px] uppercase tracking-[1.5px] text-[#94A3B8]">Teléfono</Label>
-            <Input
-              type="tel"
-              placeholder="+52 55 1234 5678"
-              value={clientPhone}
-              onChange={(e) => setClientPhone(e.target.value)}
-              required
-            />
+            <div className="flex gap-2">
+              <select
+                value={countryCode}
+                onChange={(e) => setCountryCode(e.target.value)}
+                className="h-10 w-[90px] rounded-md border-[0.5px] border-input bg-background px-2 text-sm"
+              >
+                {COUNTRY_CODES.map((c) => (
+                  <option key={c.code} value={c.code}>{c.flag} {c.code}</option>
+                ))}
+              </select>
+              <Input
+                type="tel"
+                placeholder="55 1234 5678"
+                value={clientPhone}
+                onChange={(e) => setClientPhone(e.target.value)}
+                required
+                className="flex-1"
+              />
+            </div>
           </div>
           <div className="space-y-1.5">
             <Label className="text-[11px] uppercase tracking-[1.5px] text-[#94A3B8]">
               Email <span className="normal-case tracking-normal">(opcional)</span>
             </Label>
-            <Input
-              type="email"
-              placeholder="tu@email.com"
-              value={clientEmail}
-              onChange={(e) => setClientEmail(e.target.value)}
-            />
+            <Input type="email" placeholder="tu@email.com" value={clientEmail} onChange={(e) => setClientEmail(e.target.value)} />
           </div>
         </div>
 
@@ -339,14 +369,11 @@ export function BookingFlow({ slug, services, primaryColor }: Props) {
 
         <Button
           onClick={() => {
-            if (!clientName.trim() || !clientPhone.trim()) {
-              setError('Nombre y teléfono son requeridos')
-              return
-            }
+            if (!clientName.trim() || !clientPhone.trim()) { setError('Nombre y teléfono son requeridos'); return }
             setError(null)
             setStep('confirm')
           }}
-          className="w-full text-white"
+          className="w-full rounded-[8px] text-white"
           style={{ background: primaryColor }}
         >
           Revisar reserva
@@ -355,21 +382,18 @@ export function BookingFlow({ slug, services, primaryColor }: Props) {
     )
   }
 
-  // STEP: Confirmation
+  // ── CONFIRM ──
   if (step === 'confirm') {
     const slotDate = selectedSlot ? new Date(selectedSlot.start) : new Date()
-
     return (
       <div className="space-y-4">
         {BackButton}
         <h2 className="text-base font-medium text-[#0F172A]">Confirmar reserva</h2>
 
-        <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] p-4 space-y-3">
+        <div className="rounded-[10px] border-[0.5px] border-[#E2E8F0] bg-[#F8FAFC] p-4 space-y-3">
           <div className="flex items-center gap-2 text-sm">
             <CalendarIcon className="h-4 w-4 text-[#94A3B8]" />
-            <span className="text-[#0F172A]">
-              {format(slotDate, "EEEE d 'de' MMMM, HH:mm", { locale: es })}
-            </span>
+            <span className="text-[#0F172A]">{format(slotDate, "EEEE d 'de' MMMM, HH:mm", { locale: es })}</span>
           </div>
           <div className="flex items-center gap-2 text-sm">
             <Clock className="h-4 w-4 text-[#94A3B8]" />
@@ -377,7 +401,7 @@ export function BookingFlow({ slug, services, primaryColor }: Props) {
           </div>
           <div className="flex items-center gap-2 text-sm">
             <User className="h-4 w-4 text-[#94A3B8]" />
-            <span className="text-[#0F172A]">{selectedProfessional?.display_name}</span>
+            <span className="text-[#0F172A]">{displayProfName}</span>
           </div>
           {selectedService && selectedService.price > 0 && (
             <div className="pt-2 border-t border-[#E2E8F0] flex items-center justify-between">
@@ -389,9 +413,9 @@ export function BookingFlow({ slug, services, primaryColor }: Props) {
           )}
         </div>
 
-        <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] p-4 space-y-1">
+        <div className="rounded-[10px] border-[0.5px] border-[#E2E8F0] bg-[#F8FAFC] p-4 space-y-1">
           <p className="text-sm font-medium text-[#0F172A]">{clientName}</p>
-          <p className="text-xs text-[#94A3B8]">{clientPhone}</p>
+          <p className="text-xs text-[#94A3B8]">{fullPhone}</p>
           {clientEmail && <p className="text-xs text-[#94A3B8]">{clientEmail}</p>}
         </div>
 
@@ -400,44 +424,34 @@ export function BookingFlow({ slug, services, primaryColor }: Props) {
         <Button
           onClick={handleBook}
           disabled={loading}
-          className="w-full text-white"
+          className="w-full rounded-[8px] text-white"
           style={{ background: primaryColor }}
         >
-          {loading ? (
-            <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Reservando...</>
-          ) : (
-            'Confirmar reserva'
-          )}
+          {loading ? <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Reservando...</> : 'Confirmar reserva'}
         </Button>
       </div>
     )
   }
 
-  // STEP: Success
+  // ── SUCCESS ──
   if (step === 'success') {
     const appt = appointmentResult?.appointment as Record<string, unknown> | undefined
     const startDate = appt?.start_time ? new Date(appt.start_time as string) : new Date()
-
     return (
       <div className="text-center space-y-4 py-8">
-        <div
-          className="mx-auto flex h-16 w-16 items-center justify-center rounded-full"
-          style={{ background: `${primaryColor}15` }}
-        >
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full" style={{ background: `${primaryColor}15` }}>
           <Check className="h-8 w-8" style={{ color: primaryColor }} />
         </div>
         <h2 className="text-xl font-medium text-[#0F172A]">¡Reserva confirmada!</h2>
-        <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] p-4 text-left space-y-2">
+        <div className="rounded-[10px] border-[0.5px] border-[#E2E8F0] bg-[#F8FAFC] p-4 text-left space-y-2">
           <p className="text-sm text-[#0F172A]">
-            <strong>{selectedService?.name}</strong> con {selectedProfessional?.display_name}
+            <strong>{selectedService?.name}</strong> con {displayProfName}
           </p>
           <p className="text-sm text-[#475569]">
             {format(startDate, "EEEE d 'de' MMMM, HH:mm", { locale: es })} hrs
           </p>
         </div>
-        <p className="text-xs text-[#94A3B8]">
-          Recibirás una confirmación por WhatsApp y/o email.
-        </p>
+        <p className="text-xs text-[#94A3B8]">Recibirás una confirmación por WhatsApp y/o email.</p>
       </div>
     )
   }

@@ -9,7 +9,7 @@ export function Header({ user, orgName }: HeaderProps) {
   const initials = (user.email?.[0] || 'U').toUpperCase()
 
   return (
-    <header className="flex h-14 items-center justify-between border-b border-[#E2E8F0] bg-white px-6">
+    <header className="flex h-14 items-center justify-between border-b-[0.5px] border-[#E2E8F0] bg-white px-6">
       <div>
         <span className="text-sm font-medium text-[#0F172A]">{orgName}</span>
       </div>

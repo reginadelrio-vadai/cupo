@@ -43,7 +43,7 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="flex h-screen w-[240px] flex-col border-r border-[#E2E8F0] bg-white">
+    <aside className="flex h-screen w-[240px] flex-col border-r-[0.5px] border-[#E2E8F0] bg-white">
       {/* Logo */}
       <div className="flex h-14 items-center gap-2 px-5">
         <div className="h-7 w-7 rounded-lg bg-[#00B8E6] flex items-center justify-center">
@@ -75,7 +75,7 @@ export function Sidebar() {
       </nav>
 
       {/* Logout */}
-      <div className="border-t border-[#E2E8F0] p-3">
+      <div className="border-t-[0.5px] border-[#E2E8F0] p-3">
         <button
           onClick={handleLogout}
           className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-[#475569] transition-colors duration-150 hover:bg-[#F8FAFC] hover:text-[#0F172A]"

@@ -40,6 +40,7 @@ interface ActivityEntry {
   previous_status: string | null
   new_status: string
   change_source: string
+  notes: string | null
   created_at: string
   appointments: { id: string; services: { name: string } | null; clients: { name: string } | null } | null
 }
@@ -111,7 +112,7 @@ export function AnalyticsDashboard() {
           return (
             <div
               key={card.label}
-              className="rounded-[10px] border border-[#E2E8F0] bg-white p-5"
+              className="rounded-[10px] border-[0.5px] border-[#E2E8F0] bg-white p-5 relative overflow-hidden"
               style={i === 0 ? { background: `linear-gradient(to bottom, white, rgba(0,184,230,0.02))` } : undefined}
             >
               <div className="flex items-center justify-between">
@@ -137,7 +138,7 @@ export function AnalyticsDashboard() {
       </div>
 
       {/* Chart: Appointments by day */}
-      <div className="rounded-[10px] border border-[#E2E8F0] bg-white p-5">
+      <div className="rounded-[10px] border-[0.5px] border-[#E2E8F0] bg-white p-5">
         <p className="text-[10px] uppercase tracking-[1px] text-[#94A3B8] mb-4">Citas por dia — ultimos 30 dias</p>
         {chartData.length > 0 ? (
           <ResponsiveContainer width="100%" height={260}>
@@ -167,27 +168,48 @@ export function AnalyticsDashboard() {
       {/* Today's appointments + Recent activity side by side */}
       <div className="grid grid-cols-[1.5fr_1fr] gap-4">
         {/* Today's appointments */}
-        <div className="rounded-[10px] border border-[#E2E8F0] bg-white p-5">
+        <div className="rounded-[10px] border-[0.5px] border-[#E2E8F0] bg-white p-5">
           <p className="text-[10px] uppercase tracking-[1px] text-[#94A3B8] mb-4">Citas de hoy</p>
           {todayAppts.length > 0 ? (
-            <div className="space-y-2">
-              {todayAppts.map((appt) => (
-                <div key={appt.id} className="flex items-center gap-3 rounded-lg border border-[#E2E8F0] px-3 py-2.5">
-                  <span className="text-sm font-medium text-[#0F172A] w-12">
-                    {format(new Date(appt.start_time), 'HH:mm')}
-                  </span>
-                  <div className="h-[14px] w-[1px] bg-[#E2E8F0]" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-[#0F172A] truncate">{String(appt.clients?.name || 'Cliente')}</p>
-                    <p className="text-[11px] text-[#94A3B8] truncate">
-                      {String(appt.services?.name || 'Servicio')} · {String(appt.professionals?.display_name || '')}
-                    </p>
+            <div className="space-y-0">
+              {todayAppts.map((appt, i) => {
+                const isNow = new Date(appt.start_time) <= new Date() && new Date(appt.end_time) > new Date()
+                const lineColor = appt.status === 'confirmed' ? 'linear-gradient(to bottom, #0891B2, #06D6A0)'
+                  : appt.status === 'pending_payment' ? 'linear-gradient(to bottom, #F59E0B, #EF4444)'
+                  : appt.status === 'completed' ? '#10B981' : '#E2E8F0'
+                return (
+                  <div key={appt.id} className={`flex gap-3 ${isNow ? 'bg-[rgba(0,184,230,0.03)] -mx-2 px-2 rounded-lg' : ''}`}>
+                    {/* Time */}
+                    <div className="w-11 text-right pt-3 flex-shrink-0">
+                      <span className="text-sm font-medium text-[#0F172A]">{format(new Date(appt.start_time), 'HH:mm')}</span>
+                    </div>
+                    {/* Timeline line */}
+                    <div className="flex flex-col items-center flex-shrink-0">
+                      {isNow && <div className="h-[5px] w-[5px] rounded-full bg-[#00B8E6] shadow-[0_0_6px_rgba(0,184,230,0.6)] mt-4" />}
+                      {!isNow && <div className="h-2 w-2 rounded-full mt-3.5" style={{ background: typeof lineColor === 'string' ? lineColor : '#0891B2' }} />}
+                      {i < todayAppts.length - 1 && (
+                        <div className="w-[2px] flex-1 min-h-[32px]" style={{ background: lineColor }} />
+                      )}
+                    </div>
+                    {/* Content */}
+                    <div className="flex-1 py-2.5 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm text-[#0F172A] truncate font-medium">{String(appt.clients?.name || 'Cliente')}</p>
+                        {isNow && <span className="text-[10px] uppercase tracking-[1px] text-[#00B8E6] font-medium">Ahora</span>}
+                      </div>
+                      <p className="text-[11px] text-[#94A3B8] truncate">
+                        {String(appt.services?.name || 'Servicio')} · {String(appt.professionals?.display_name || '')}
+                      </p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className={`rounded-[4px] px-2 py-0.5 text-[10px] font-medium ${STATUS_BADGE[appt.status] || ''}`}>
+                          {STATUS_LABELS[appt.status] || appt.status}
+                        </span>
+                        <span className="text-[11px] text-[#94A3B8]">{appt.source === 'whatsapp' ? 'WhatsApp' : appt.source === 'booking_page' ? 'Booking page' : appt.source}</span>
+                      </div>
+                    </div>
                   </div>
-                  <span className={`rounded-[4px] px-2 py-0.5 text-[10px] font-medium ${STATUS_BADGE[appt.status] || ''}`}>
-                    {STATUS_LABELS[appt.status] || appt.status}
-                  </span>
-                </div>
-              ))}
+                )
+              })}
             </div>
           ) : (
             <p className="text-sm text-[#94A3B8] text-center py-6">No hay citas para hoy</p>
@@ -195,7 +217,7 @@ export function AnalyticsDashboard() {
         </div>
 
         {/* Recent activity */}
-        <div className="rounded-[10px] border border-[#E2E8F0] bg-white p-5">
+        <div className="rounded-[10px] border-[0.5px] border-[#E2E8F0] bg-white p-5">
           <p className="text-[10px] uppercase tracking-[1px] text-[#94A3B8] mb-4">Actividad reciente</p>
           {activity.length > 0 ? (
             <div className="space-y-2 max-h-[300px] overflow-y-auto">
@@ -209,8 +231,15 @@ export function AnalyticsDashboard() {
                         {String(appt?.services?.name || 'Cita')} — {String(appt?.clients?.name || 'Cliente')}
                       </p>
                       <p className="text-[#94A3B8]">
-                        {entry.previous_status ? `${STATUS_LABELS[entry.previous_status] || entry.previous_status} → ` : ''}
-                        {STATUS_LABELS[entry.new_status] || entry.new_status}
+                        {entry.previous_status === entry.new_status
+                          ? (entry.notes || 'Reagendada')
+                          : (
+                            <>
+                              {entry.previous_status ? `${STATUS_LABELS[entry.previous_status] || entry.previous_status} → ` : ''}
+                              {STATUS_LABELS[entry.new_status] || entry.new_status}
+                            </>
+                          )
+                        }
                         {' · '}
                         {entry.change_source}
                         {' · '}
