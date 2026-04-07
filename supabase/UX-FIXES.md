@@ -19,3 +19,6 @@
 ## Calendario (M6)
 - [ ] BUG: Filtro por profesional no filtra — se siguen viendo todas las citas
 - [ ] BUG: Drag-and-drop reagenda OK pero el modal muestra el horario viejo (no refresca)
+
+## Dashboard (M9)
+- [ ] Actividad reciente: reagendamiento aparece como 2 entradas separadas. Debería consolidarse en una línea: "Diagnóstico — Iñigo López: Reagendada de 09:00 a 10:00 · dashboard · 17:34"
