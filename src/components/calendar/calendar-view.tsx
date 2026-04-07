@@ -44,27 +44,43 @@ export function CalendarView({ professionals, services }: Props) {
     const params = new URLSearchParams({ start, end })
     if (filterProfessional) params.set('professional_id', filterProfessional)
 
-    const res = await fetch(`/api/dashboard/appointments?${params}`)
-    const data = await res.json()
+    // Fetch appointments + external events in parallel
+    const [apptRes, extRes] = await Promise.all([
+      fetch(`/api/dashboard/appointments?${params}`),
+      fetch(`/api/dashboard/external-events?${params}`),
+    ])
 
-    if (data.data?.appointments) {
-      const mapped: CalendarEvent[] = data.data.appointments.map((appt: Record<string, unknown>) => {
-        const svc = appt.services as Record<string, unknown> | null
-        const client = appt.clients as Record<string, unknown> | null
-        const colors = getStatusColors(appt.status as string)
-        return {
-          id: appt.id as string,
-          title: `${svc?.name || 'Cita'} — ${client?.name || 'Cliente'}`,
-          start: appt.start_time as string,
-          end: appt.end_time as string,
-          backgroundColor: colors.bg,
-          borderColor: colors.border,
-          textColor: colors.text,
-          extendedProps: { appointment: appt },
-        }
-      })
-      setEvents(mapped)
-    }
+    const apptData = await apptRes.json()
+    const extData = await extRes.json()
+
+    const apptEvents: CalendarEvent[] = (apptData.data?.appointments || []).map((appt: Record<string, unknown>) => {
+      const svc = appt.services as Record<string, unknown> | null
+      const client = appt.clients as Record<string, unknown> | null
+      const colors = getStatusColors(appt.status as string)
+      return {
+        id: appt.id as string,
+        title: `${svc?.name || 'Cita'} — ${client?.name || 'Cliente'}`,
+        start: appt.start_time as string,
+        end: appt.end_time as string,
+        backgroundColor: colors.bg,
+        borderColor: colors.border,
+        textColor: colors.text,
+        extendedProps: { appointment: appt },
+      }
+    })
+
+    const extEvents: CalendarEvent[] = (extData.data?.events || []).map((ext: Record<string, unknown>) => ({
+      id: `ext-${ext.id}`,
+      title: String(ext.summary || '(Bloqueado)'),
+      start: ext.start_time as string,
+      end: ext.end_time as string,
+      backgroundColor: '#9CA3AF',
+      borderColor: '#6B7280',
+      textColor: '#FFFFFF',
+      extendedProps: { appointment: { ...ext, _type: 'external' } },
+    }))
+
+    setEvents([...apptEvents, ...extEvents])
   }, [filterProfessional])
 
   const handleDatesSet = useCallback((info: DatesSetArg) => {
@@ -75,7 +91,10 @@ export function CalendarView({ professionals, services }: Props) {
   }, [fetchAppointments])
 
   const handleEventClick = useCallback((info: EventClickArg) => {
-    setSelectedAppointment(info.event.extendedProps.appointment as Record<string, unknown>)
+    const appt = info.event.extendedProps.appointment as Record<string, unknown>
+    // Don't open detail modal for external Google Calendar events
+    if (appt?._type === 'external') return
+    setSelectedAppointment(appt)
     setShowDetailModal(true)
   }, [])
 

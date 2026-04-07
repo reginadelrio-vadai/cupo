@@ -121,6 +121,15 @@ export async function getAvailableSlots(
     .lt('start_time', dayEndUTC)
     .not('status', 'in', '("cancelled","expired")')
 
+  // STEP 5b: External events (Google Calendar) for this day
+  const { data: externalEvents } = await supabase
+    .from('professional_external_events')
+    .select('professional_id, start_time, end_time, is_all_day')
+    .in('professional_id', profIds)
+    .gte('start_time', dayStartUTC)
+    .lt('start_time', dayEndUTC)
+    .neq('status', 'cancelled')
+
   // STEP 6: Business rules — "now" in org timezone
   const nowInTz = toZonedTime(new Date(), timezone)
   const earliestStart = addHours(nowInTz, minAdvanceHours)
@@ -181,13 +190,22 @@ export async function getAvailableSlots(
         )
 
         // STEP 5: Check conflicts with existing appointments
-        const hasConflict = profAppts.some(appt => {
+        const hasApptConflict = profAppts.some(appt => {
           const apptStart = new Date(appt.start_time)
           const apptEndWithBuffer = addMinutes(new Date(appt.end_time), bufferMinutes)
           return isBefore(slotStartDate, apptEndWithBuffer) && isBefore(apptStart, slotEndDate)
         })
 
-        if (!hasConflict) {
+        // STEP 5b: Check conflicts with external events (Google Calendar)
+        const profExtEvents = (externalEvents || []).filter(e => e.professional_id === prof.id)
+        const hasExtConflict = profExtEvents.some(ext => {
+          if (ext.is_all_day) return true
+          const extStart = new Date(ext.start_time)
+          const extEnd = new Date(ext.end_time)
+          return isBefore(slotStartDate, extEnd) && isBefore(extStart, slotEndDate)
+        })
+
+        if (!hasApptConflict && !hasExtConflict) {
           // STEP 6: Business rules
           const slotStartInTz = toZonedTime(slotStartDate, timezone)
           const inFuture = isBefore(earliestStart, slotStartInTz)
@@ -279,6 +297,15 @@ export async function getAvailableSlotsForRange(
     .lt('start_time', rangeEndUTC)
     .not('status', 'in', '("cancelled","expired")')
 
+  // QUERY 5: All external events in range (Google Calendar)
+  const { data: allExternalEvents } = await supabase
+    .from('professional_external_events')
+    .select('professional_id, start_time, end_time, is_all_day')
+    .in('professional_id', profIds)
+    .gte('start_time', rangeStartUTC)
+    .lt('start_time', rangeEndUTC)
+    .neq('status', 'cancelled')
+
   // IN-MEMORY: Calculate per day
   const nowInTz = toZonedTime(new Date(), timezone)
   const earliestStart = addHours(nowInTz, minAdvanceHours)
@@ -348,13 +375,26 @@ export async function getAvailableSlotsForRange(
             timezone
           )
 
-          const hasConflict = profAppts.some(appt => {
+          const hasApptConflict = profAppts.some(appt => {
             const apptStart = new Date(appt.start_time)
             const apptEndWithBuffer = addMinutes(new Date(appt.end_time), bufferMinutes)
             return isBefore(slotStartDate, apptEndWithBuffer) && isBefore(apptStart, slotEndDate)
           })
 
-          if (!hasConflict) {
+          // Check external events (Google Calendar)
+          const profExtEventsDay = (allExternalEvents || []).filter(e => {
+            if (e.professional_id !== prof.id) return false
+            const extStart = new Date(e.start_time)
+            return extStart >= dayStartUTC && extStart < dayEndUTC
+          })
+          const hasExtConflict = profExtEventsDay.some(ext => {
+            if (ext.is_all_day) return true
+            const extStart = new Date(ext.start_time)
+            const extEnd = new Date(ext.end_time)
+            return isBefore(slotStartDate, extEnd) && isBefore(extStart, slotEndDate)
+          })
+
+          if (!hasApptConflict && !hasExtConflict) {
             const slotStartInTz = toZonedTime(slotStartDate, timezone)
             if (isBefore(earliestStart, slotStartInTz) && isBefore(slotStartInTz, latestDate)) {
               daySlots.push({
