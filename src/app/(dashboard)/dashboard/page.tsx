@@ -6,10 +6,10 @@ export default async function DashboardPage() {
 
   return (
     <div>
-      <h1 className="text-[28px] font-medium tracking-[-1px] text-[#0F172A]">
+      <h1 className="text-[28px] font-medium tracking-[-1px]" style={{ color: 'var(--dash-text)' }}>
         Dashboard
       </h1>
-      <p className="mt-1 text-sm text-[#475569] mb-6">
+      <p className="mt-1 text-[13px] mb-6" style={{ color: 'var(--dash-text-muted)' }}>
         Bienvenido de vuelta
       </p>
 

@@ -4,16 +4,20 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { Input } from '@/components/ui/input'
-import { Loader2 } from 'lucide-react'
+import { Loader2, ClipboardList } from 'lucide-react'
 
 const STATUS_BADGE: Record<string, string> = {
-  confirmed: 'bg-[#0891B2]/[0.06] text-[#0891B2]',
-  pending_payment: 'bg-[#F59E0B]/[0.06] text-[#D97706]',
-  completed: 'bg-[#10B981]/[0.06] text-[#10B981]',
-  cancelled: 'bg-[#94A3B8]/[0.06] text-[#94A3B8]',
-  no_show: 'bg-[#EF4444]/[0.06] text-[#EF4444]',
-  expired: 'bg-[#CBD5E1]/[0.06] text-[#475569]',
+  confirmed: 'bg-[#0891B2]/[0.08] text-[#0891B2]',
+  pending_payment: 'bg-[#F59E0B]/[0.08] text-[#D97706]',
+  completed: 'bg-[#10B981]/[0.08] text-[#10B981]',
+  cancelled: 'bg-[#94A3B8]/[0.08] text-[#94A3B8]',
+  no_show: 'bg-[#EF4444]/[0.08] text-[#EF4444]',
+  expired: 'bg-[#CBD5E1]/[0.08] text-[#64748B]',
+}
+
+const STATUS_DOT: Record<string, string> = {
+  confirmed: '#0891B2', pending_payment: '#F59E0B', completed: '#10B981',
+  cancelled: '#94A3B8', no_show: '#EF4444', expired: '#CBD5E1',
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -33,7 +37,6 @@ export default function AppointmentsPage() {
     const now = new Date()
     const start = dateFrom || new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
     const end = dateTo || new Date(now.getFullYear(), now.getMonth() + 2, 0).toISOString()
-
     const params = new URLSearchParams({ start, end })
 
     fetch(`/api/dashboard/appointments?${params}`)
@@ -47,38 +50,38 @@ export default function AppointmentsPage() {
       .catch(() => setLoading(false))
   }, [statusFilter, dateFrom, dateTo])
 
+  const selectStyle = { backgroundColor: 'var(--dash-surface)', borderColor: 'var(--dash-border)', color: 'var(--dash-text)' }
+
   return (
     <div>
-      <h1 className="text-[28px] font-medium tracking-[-1px] text-[#0F172A]">Citas</h1>
-      <p className="mt-1 text-sm text-[#475569]">{appointments.length} citas</p>
+      <h1 className="text-[28px] font-medium tracking-[-1px]" style={{ color: 'var(--dash-text)' }}>Citas</h1>
+      <p className="mt-1 text-[13px]" style={{ color: 'var(--dash-text-muted)' }}>{appointments.length} citas</p>
 
-      {/* Filters */}
       <div className="mt-6 flex items-center gap-3">
-        <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
-          className="h-9 rounded-md border border-[#E2E8F0] bg-white px-3 text-sm">
+        <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="h-9 rounded-xl border-[0.5px] px-3 text-sm focus:outline-none" style={selectStyle}>
           <option value="">Todos los estados</option>
           {Object.entries(STATUS_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
         </select>
-        <Input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} className="w-36 h-9 text-sm" />
-        <span className="text-[#94A3B8] text-xs">a</span>
-        <Input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} className="w-36 h-9 text-sm" />
+        <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} className="h-9 w-36 rounded-xl border-[0.5px] px-3 text-sm focus:outline-none" style={selectStyle} />
+        <span className="text-xs" style={{ color: 'var(--dash-text-muted)' }}>a</span>
+        <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} className="h-9 w-36 rounded-xl border-[0.5px] px-3 text-sm focus:outline-none" style={selectStyle} />
       </div>
 
-      <div className="mt-4 rounded-[10px] border border-[#E2E8F0] bg-white overflow-hidden">
+      <div className="mt-4 rounded-xl border-[0.5px] overflow-hidden shadow-sm" style={{ backgroundColor: 'var(--dash-surface)', borderColor: 'var(--dash-border)' }}>
         {loading ? (
-          <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-[#94A3B8]" /></div>
+          <div className="flex justify-center py-12"><Loader2 className="h-5 w-5 animate-spin" style={{ color: 'var(--dash-text-muted)' }} /></div>
         ) : appointments.length === 0 ? (
-          <p className="text-sm text-[#94A3B8] text-center py-12">No hay citas</p>
+          <div className="text-center py-16">
+            <ClipboardList className="h-8 w-8 mx-auto mb-3" style={{ color: 'var(--dash-text-muted)' }} />
+            <p className="text-[13px]" style={{ color: 'var(--dash-text-muted)' }}>No hay citas</p>
+          </div>
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-[#E2E8F0]">
-                <th className="px-4 py-3 text-left text-[10px] uppercase tracking-[1px] text-[#94A3B8] font-normal">Fecha/Hora</th>
-                <th className="px-4 py-3 text-left text-[10px] uppercase tracking-[1px] text-[#94A3B8] font-normal">Cliente</th>
-                <th className="px-4 py-3 text-left text-[10px] uppercase tracking-[1px] text-[#94A3B8] font-normal">Servicio</th>
-                <th className="px-4 py-3 text-left text-[10px] uppercase tracking-[1px] text-[#94A3B8] font-normal">Profesional</th>
-                <th className="px-4 py-3 text-left text-[10px] uppercase tracking-[1px] text-[#94A3B8] font-normal">Estado</th>
-                <th className="px-4 py-3 text-left text-[10px] uppercase tracking-[1px] text-[#94A3B8] font-normal">Fuente</th>
+              <tr style={{ borderBottom: '0.5px solid var(--dash-border)' }}>
+                {['Fecha/Hora', 'Cliente', 'Servicio', 'Profesional', 'Estado', 'Fuente'].map(h => (
+                  <th key={h} className="px-4 py-3 text-left text-[11px] uppercase tracking-[1px] font-normal" style={{ color: 'var(--dash-text-muted)' }}>{h}</th>
+                ))}
               </tr>
             </thead>
             <tbody>
@@ -86,21 +89,28 @@ export default function AppointmentsPage() {
                 const svc = appt.services as Record<string, unknown> | null
                 const prof = appt.professionals as Record<string, unknown> | null
                 const client = appt.clients as Record<string, unknown> | null
+                const status = String(appt.status)
                 return (
                   <tr key={String(appt.id)} onClick={() => router.push(`/appointments/${appt.id}`)}
-                    className="border-b border-[#E2E8F0] last:border-0 hover:bg-[#F8FAFC] cursor-pointer transition-colors">
-                    <td className="px-4 py-3 text-[#0F172A]">
+                    className="cursor-pointer transition-colors duration-150"
+                    style={{ borderBottom: '0.5px solid var(--dash-border)' }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--dash-hover)'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
+                    <td className="px-4 py-3 font-medium" style={{ color: 'var(--dash-text)' }}>
                       {format(new Date(String(appt.start_time)), "d MMM, HH:mm", { locale: es })}
                     </td>
-                    <td className="px-4 py-3 text-[#475569]">{String(client?.name || '—')}</td>
-                    <td className="px-4 py-3 text-[#475569]">{String(svc?.name || '—')}</td>
-                    <td className="px-4 py-3 text-[#475569]">{String(prof?.display_name || '—')}</td>
+                    <td className="px-4 py-3" style={{ color: 'var(--dash-text-secondary)' }}>{String(client?.name || '—')}</td>
+                    <td className="px-4 py-3" style={{ color: 'var(--dash-text-secondary)' }}>{String(svc?.name || '—')}</td>
+                    <td className="px-4 py-3" style={{ color: 'var(--dash-text-secondary)' }}>{String(prof?.display_name || '—')}</td>
                     <td className="px-4 py-3">
-                      <span className={`rounded-[4px] px-2 py-0.5 text-[10px] font-medium ${STATUS_BADGE[String(appt.status)] || ''}`}>
-                        {STATUS_LABELS[String(appt.status)] || String(appt.status)}
+                      <span className="inline-flex items-center gap-1.5">
+                        <span className="h-[6px] w-[6px] rounded-full" style={{ backgroundColor: STATUS_DOT[status] }} />
+                        <span className={`rounded-[4px] px-1.5 py-[1px] text-[10px] font-medium ${STATUS_BADGE[status] || ''}`}>
+                          {STATUS_LABELS[status] || status}
+                        </span>
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-[10px] text-[#94A3B8]">{String(appt.source)}</td>
+                    <td className="px-4 py-3 text-[10px]" style={{ color: 'var(--dash-text-muted)' }}>{String(appt.source)}</td>
                   </tr>
                 )
               })}

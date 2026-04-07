@@ -4,15 +4,8 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import {
-  LayoutDashboard,
-  Calendar,
-  ClipboardList,
-  Users,
-  Briefcase,
-  UserCog,
-  CreditCard,
-  Settings,
-  LogOut,
+  LayoutDashboard, Calendar, ClipboardList, Users,
+  Briefcase, UserCog, CreditCard, Settings, LogOut,
 } from 'lucide-react'
 import { createBrowserClient } from '@supabase/ssr'
 import { useRouter } from 'next/navigation'
@@ -43,17 +36,15 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="flex h-screen w-[240px] flex-col border-r-[0.5px] border-[#E2E8F0] bg-white">
-      {/* Logo */}
-      <div className="flex h-14 items-center gap-2 px-5">
+    <aside className="flex h-screen w-[232px] flex-col border-r-[0.5px]" style={{ backgroundColor: 'var(--dash-sidebar)', borderColor: 'var(--dash-border)' }}>
+      <div className="flex h-16 items-center gap-2.5 px-5">
         <div className="h-7 w-7 rounded-lg bg-[#00B8E6] flex items-center justify-center">
           <div className="h-1.5 w-1.5 rounded-full bg-[#060608]" />
         </div>
-        <span className="text-base font-medium tracking-[0.5px] text-[#0F172A]">cupo</span>
+        <span className="text-[15px] font-medium tracking-[0.5px]" style={{ color: 'var(--dash-text)' }}>cupo</span>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 space-y-0.5 px-3 pt-2">
+      <nav className="flex-1 px-3 pt-1 space-y-px">
         {navItems.map((item) => {
           const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
           return (
@@ -61,26 +52,33 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors duration-150',
-                isActive
-                  ? 'bg-[#00B8E6]/[0.06] text-[#0891B2]'
-                  : 'text-[#475569] hover:bg-[#F8FAFC] hover:text-[#0F172A]'
+                'relative flex items-center gap-3 rounded-lg px-3 py-[9px] text-[13px] font-normal transition-all duration-150',
+                isActive ? 'text-[#0891B2]' : ''
               )}
+              style={{
+                backgroundColor: isActive ? 'var(--dash-nav-active)' : 'transparent',
+                color: isActive ? '#0891B2' : 'var(--dash-text-muted)',
+              }}
+              onMouseEnter={(e) => { if (!isActive) { e.currentTarget.style.backgroundColor = 'var(--dash-hover)'; e.currentTarget.style.color = 'var(--dash-text)' } }}
+              onMouseLeave={(e) => { if (!isActive) { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--dash-text-muted)' } }}
             >
-              <item.icon className="h-4 w-4" />
+              {isActive && <div className="absolute left-0 top-[6px] bottom-[6px] w-[2px] rounded-full bg-[#0891B2]" />}
+              <item.icon className="h-[18px] w-[18px]" strokeWidth={isActive ? 2 : 1.5} />
               {item.label}
             </Link>
           )
         })}
       </nav>
 
-      {/* Logout */}
-      <div className="border-t-[0.5px] border-[#E2E8F0] p-3">
+      <div className="px-3 py-3 border-t-[0.5px]" style={{ borderColor: 'var(--dash-border)' }}>
         <button
           onClick={handleLogout}
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-[#475569] transition-colors duration-150 hover:bg-[#F8FAFC] hover:text-[#0F172A]"
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-[9px] text-[13px] font-normal transition-all duration-150"
+          style={{ color: 'var(--dash-text-muted)' }}
+          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--dash-hover)'; e.currentTarget.style.color = 'var(--dash-text)' }}
+          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--dash-text-muted)' }}
         >
-          <LogOut className="h-4 w-4" />
+          <LogOut className="h-[18px] w-[18px]" strokeWidth={1.5} />
           Cerrar sesión
         </button>
       </div>

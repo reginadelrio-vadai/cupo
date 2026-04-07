@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -46,20 +46,21 @@ interface ActivityEntry {
 }
 
 const STATUS_LABELS: Record<string, string> = {
-  confirmed: 'Confirmada',
-  pending_payment: 'Pago pendiente',
-  completed: 'Completada',
-  cancelled: 'Cancelada',
-  no_show: 'No-show',
-  expired: 'Expirada',
+  confirmed: 'Confirmada', pending_payment: 'Pago pendiente', completed: 'Completada',
+  cancelled: 'Cancelada', no_show: 'No-show', expired: 'Expirada',
 }
 
 const STATUS_BADGE: Record<string, string> = {
-  confirmed: 'bg-[#0891B2]/[0.06] text-[#0891B2]',
-  pending_payment: 'bg-[#F59E0B]/[0.06] text-[#D97706]',
-  completed: 'bg-[#10B981]/[0.06] text-[#10B981]',
-  cancelled: 'bg-[#94A3B8]/[0.06] text-[#94A3B8]',
-  no_show: 'bg-[#EF4444]/[0.06] text-[#EF4444]',
+  confirmed: 'bg-[#0891B2]/[0.08] text-[#0891B2]',
+  pending_payment: 'bg-[#F59E0B]/[0.08] text-[#D97706]',
+  completed: 'bg-[#10B981]/[0.08] text-[#10B981]',
+  cancelled: 'bg-[#94A3B8]/[0.08] text-[#94A3B8]',
+  no_show: 'bg-[#EF4444]/[0.08] text-[#EF4444]',
+}
+
+const STATUS_DOT_COLOR: Record<string, string> = {
+  confirmed: '#0891B2', pending_payment: '#F59E0B', completed: '#10B981',
+  cancelled: '#94A3B8', no_show: '#EF4444', expired: '#CBD5E1',
 }
 
 export function AnalyticsDashboard() {
@@ -86,8 +87,8 @@ export function AnalyticsDashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-6 w-6 animate-spin text-[#94A3B8]" />
+      <div className="flex items-center justify-center py-24">
+        <Loader2 className="h-5 w-5 animate-spin text-[#94A3B8]" />
       </div>
     )
   }
@@ -98,38 +99,41 @@ export function AnalyticsDashboard() {
   const statCards = [
     { label: 'Citas este mes', value: String(stats?.appointments.value ?? 0), change: stats?.appointments.change, icon: Calendar, color: '#0891B2' },
     { label: 'Ingresos', value: formatCurrency(stats?.revenue.value ?? 0), change: stats?.revenue.change, icon: DollarSign, color: '#10B981' },
-    { label: 'Tasa no-show', value: `${stats?.noShowRate.value ?? 0}%`, change: stats?.noShowRate.change, icon: UserX, color: '#EF4444', invertChange: true },
+    { label: 'Tasa no-show', value: `${stats?.noShowRate.value ?? 0}%`, change: stats?.noShowRate.change, icon: UserX, color: '#F59E0B', invertChange: true },
     { label: 'Clientes nuevos', value: String(stats?.newClients.value ?? 0), change: stats?.newClients.change, icon: Users, color: '#06D6A0' },
   ]
 
   return (
-    <div className="space-y-6">
-      {/* Stats cards */}
-      <div className="grid grid-cols-[1.5fr_1fr_1fr_1fr] gap-4">
-        {statCards.map((card, i) => {
+    <div className="space-y-5">
+      {/* ── Stat cards ── */}
+      <div className="grid grid-cols-[1.4fr_1fr_1fr_1fr] gap-4">
+        {statCards.map((card) => {
           const Icon = card.icon
           const isPositive = card.invertChange ? (card.change ?? 0) < 0 : (card.change ?? 0) > 0
           return (
             <div
               key={card.label}
-              className="rounded-[10px] border-[0.5px] border-[#E2E8F0] bg-white p-5 relative overflow-hidden"
-              style={i === 0 ? { background: `linear-gradient(to bottom, white, rgba(0,184,230,0.02))` } : undefined}
+              className="group rounded-xl border-[0.5px] p-5 transition-all duration-200 hover:shadow-[0_2px_12px_rgba(0,0,0,0.04)]"
+              style={{ backgroundColor: 'var(--dash-surface)', borderColor: 'var(--dash-border)' }}
             >
-              <div className="flex items-center justify-between">
-                <p className="text-[10px] uppercase tracking-[1px] text-[#94A3B8]">{card.label}</p>
-                <Icon className="h-4 w-4" style={{ color: card.color }} />
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-[12px] uppercase tracking-[1px] font-normal" style={{ color: 'var(--dash-text-muted)' }}>{card.label}</p>
+                <div className="h-8 w-8 rounded-lg flex items-center justify-center transition-colors duration-200" style={{ background: `${card.color}10` }}>
+                  <Icon className="h-4 w-4" style={{ color: card.color }} />
+                </div>
               </div>
-              <p className="mt-2 text-[28px] font-medium tracking-[-1px] text-[#0F172A]">{card.value}</p>
+              <p className="text-[28px] font-medium tracking-[-1px]" style={{ color: 'var(--dash-text)' }}>{card.value}</p>
               {card.change !== null && card.change !== undefined && (
-                <div className="mt-1 flex items-center gap-1">
+                <div className="mt-2 flex items-center gap-1.5">
                   {isPositive ? (
                     <TrendingUp className="h-3 w-3 text-[#10B981]" />
                   ) : (
                     <TrendingDown className="h-3 w-3 text-[#EF4444]" />
                   )}
-                  <span className={`text-[11px] ${isPositive ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>
-                    {card.change > 0 ? '+' : ''}{card.change}% vs mes anterior
+                  <span className={`text-[11px] font-normal ${isPositive ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>
+                    {card.change > 0 ? '+' : ''}{card.change}%
                   </span>
+                  <span className="text-[11px] text-[#CBD5E1]">vs mes anterior</span>
                 </div>
               )}
             </div>
@@ -137,74 +141,86 @@ export function AnalyticsDashboard() {
         })}
       </div>
 
-      {/* Chart: Appointments by day */}
-      <div className="rounded-[10px] border-[0.5px] border-[#E2E8F0] bg-white p-5">
-        <p className="text-[10px] uppercase tracking-[1px] text-[#94A3B8] mb-4">Citas por dia — ultimos 30 dias</p>
+      {/* ── Chart ── */}
+      <div className="rounded-xl border-[0.5px] p-5" style={{ backgroundColor: 'var(--dash-surface)', borderColor: 'var(--dash-border)' }}>
+        <p className="text-[12px] uppercase tracking-[1px] font-normal mb-5" style={{ color: 'var(--dash-text-muted)' }}>Citas por dia — ultimos 30 dias</p>
         {chartData.length > 0 ? (
-          <ResponsiveContainer width="100%" height={260}>
-            <BarChart data={chartData} barSize={12}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
+          <ResponsiveContainer width="100%" height={240}>
+            <BarChart data={chartData} barSize={10} barGap={2}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" vertical={false} />
               <XAxis
                 dataKey="date"
                 tick={{ fontSize: 10, fill: '#94A3B8' }}
                 tickFormatter={(v: string) => format(new Date(v + 'T12:00:00'), 'd MMM', { locale: es })}
+                axisLine={{ stroke: '#E2E8F0' }}
+                tickLine={false}
               />
-              <YAxis tick={{ fontSize: 10, fill: '#94A3B8' }} allowDecimals={false} />
+              <YAxis
+                tick={{ fontSize: 10, fill: '#94A3B8' }}
+                allowDecimals={false}
+                axisLine={false}
+                tickLine={false}
+              />
               <Tooltip
-                contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid #E2E8F0' }}
+                contentStyle={{ fontSize: 12, borderRadius: 10, border: '0.5px solid #E2E8F0', boxShadow: '0 4px 12px rgba(0,0,0,0.06)' }}
                 labelFormatter={(v: string) => format(new Date(v + 'T12:00:00'), "d 'de' MMMM", { locale: es })}
+                cursor={{ fill: 'rgba(0,184,230,0.04)' }}
               />
-              <Legend wrapperStyle={{ fontSize: 11 }} />
               <Bar dataKey="completed" name="Completadas" stackId="a" fill="#10B981" radius={[0, 0, 0, 0]} />
-              <Bar dataKey="confirmed" name="Confirmadas" stackId="a" fill="#0891B2" radius={[0, 0, 0, 0]} />
-              <Bar dataKey="no_show" name="No-show" stackId="a" fill="#EF4444" radius={[2, 2, 0, 0]} />
+              <Bar dataKey="confirmed" name="Confirmadas" stackId="a" fill="#00B8E6" radius={[0, 0, 0, 0]} />
+              <Bar dataKey="no_show" name="No-show" stackId="a" fill="#EF4444" radius={[3, 3, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         ) : (
-          <p className="text-sm text-[#94A3B8] text-center py-8">Sin datos aún</p>
+          <p className="text-[13px] text-[#94A3B8] text-center py-10">Sin datos aún</p>
         )}
       </div>
 
-      {/* Today's appointments + Recent activity side by side */}
-      <div className="grid grid-cols-[1.5fr_1fr] gap-4">
-        {/* Today's appointments */}
-        <div className="rounded-[10px] border-[0.5px] border-[#E2E8F0] bg-white p-5">
-          <p className="text-[10px] uppercase tracking-[1px] text-[#94A3B8] mb-4">Citas de hoy</p>
+      {/* ── Today + Activity ── */}
+      <div className="grid grid-cols-[1.4fr_1fr] gap-4">
+        {/* Today's appointments — timeline */}
+        <div className="rounded-xl border-[0.5px] p-5" style={{ backgroundColor: 'var(--dash-surface)', borderColor: 'var(--dash-border)' }}>
+          <p className="text-[12px] uppercase tracking-[1px] font-normal mb-5" style={{ color: 'var(--dash-text-muted)' }}>Citas de hoy</p>
           {todayAppts.length > 0 ? (
             <div className="space-y-0">
               {todayAppts.map((appt, i) => {
                 const isNow = new Date(appt.start_time) <= new Date() && new Date(appt.end_time) > new Date()
-                const lineColor = appt.status === 'confirmed' ? 'linear-gradient(to bottom, #0891B2, #06D6A0)'
-                  : appt.status === 'pending_payment' ? 'linear-gradient(to bottom, #F59E0B, #EF4444)'
-                  : appt.status === 'completed' ? '#10B981' : '#E2E8F0'
+                const dotColor = STATUS_DOT_COLOR[appt.status] || '#94A3B8'
                 return (
                   <div key={appt.id} className={`flex gap-3 ${isNow ? 'bg-[rgba(0,184,230,0.03)] -mx-2 px-2 rounded-lg' : ''}`}>
                     {/* Time */}
                     <div className="w-11 text-right pt-3 flex-shrink-0">
-                      <span className="text-sm font-medium text-[#0F172A]">{format(new Date(appt.start_time), 'HH:mm')}</span>
+                      <span className="text-[13px] font-medium tabular-nums" style={{ color: 'var(--dash-text)' }}>{format(new Date(appt.start_time), 'HH:mm')}</span>
                     </div>
-                    {/* Timeline line */}
-                    <div className="flex flex-col items-center flex-shrink-0">
-                      {isNow && <div className="h-[5px] w-[5px] rounded-full bg-[#00B8E6] shadow-[0_0_6px_rgba(0,184,230,0.6)] mt-4" />}
-                      {!isNow && <div className="h-2 w-2 rounded-full mt-3.5" style={{ background: typeof lineColor === 'string' ? lineColor : '#0891B2' }} />}
+                    {/* Timeline */}
+                    <div className="flex flex-col items-center flex-shrink-0 w-3">
+                      {isNow ? (
+                        <div className="h-[6px] w-[6px] rounded-full bg-[#00B8E6] shadow-[0_0_8px_rgba(0,184,230,0.6)] mt-[14px]" />
+                      ) : (
+                        <div className="h-[7px] w-[7px] rounded-full mt-[14px] border-[1.5px]" style={{ borderColor: dotColor }} />
+                      )}
                       {i < todayAppts.length - 1 && (
-                        <div className="w-[2px] flex-1 min-h-[32px]" style={{ background: lineColor }} />
+                        <div className="w-[1px] flex-1 min-h-[28px]" style={{ backgroundColor: 'var(--dash-border)' }} />
                       )}
                     </div>
                     {/* Content */}
-                    <div className="flex-1 py-2.5 min-w-0">
+                    <div className="flex-1 py-2 min-w-0">
                       <div className="flex items-center gap-2">
-                        <p className="text-sm text-[#0F172A] truncate font-medium">{String(appt.clients?.name || 'Cliente')}</p>
-                        {isNow && <span className="text-[10px] uppercase tracking-[1px] text-[#00B8E6] font-medium">Ahora</span>}
+                        <p className="text-[13px] truncate font-medium" style={{ color: 'var(--dash-text)' }}>{String(appt.clients?.name || 'Cliente')}</p>
+                        {isNow && (
+                          <span className="text-[9px] uppercase tracking-[1px] text-[#00B8E6] font-medium bg-[#00B8E6]/[0.08] px-1.5 py-0.5 rounded">Ahora</span>
+                        )}
                       </div>
-                      <p className="text-[11px] text-[#94A3B8] truncate">
+                      <p className="text-[12px] truncate mt-0.5" style={{ color: 'var(--dash-text-muted)' }}>
                         {String(appt.services?.name || 'Servicio')} · {String(appt.professionals?.display_name || '')}
                       </p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className={`rounded-[4px] px-2 py-0.5 text-[10px] font-medium ${STATUS_BADGE[appt.status] || ''}`}>
+                      <div className="flex items-center gap-2 mt-1.5">
+                        <span className={`rounded-[4px] px-1.5 py-[1px] text-[10px] font-medium ${STATUS_BADGE[appt.status] || ''}`}>
                           {STATUS_LABELS[appt.status] || appt.status}
                         </span>
-                        <span className="text-[11px] text-[#94A3B8]">{appt.source === 'whatsapp' ? 'WhatsApp' : appt.source === 'booking_page' ? 'Booking page' : appt.source}</span>
+                        <span className="text-[10px] text-[#CBD5E1]">
+                          {appt.source === 'whatsapp' ? 'WhatsApp' : appt.source === 'booking_page' ? 'Booking' : appt.source}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -212,46 +228,42 @@ export function AnalyticsDashboard() {
               })}
             </div>
           ) : (
-            <p className="text-sm text-[#94A3B8] text-center py-6">No hay citas para hoy</p>
+            <p className="text-[13px] text-[#94A3B8] text-center py-8">No hay citas para hoy</p>
           )}
         </div>
 
-        {/* Recent activity */}
-        <div className="rounded-[10px] border-[0.5px] border-[#E2E8F0] bg-white p-5">
-          <p className="text-[10px] uppercase tracking-[1px] text-[#94A3B8] mb-4">Actividad reciente</p>
+        {/* Activity */}
+        <div className="rounded-xl border-[0.5px] p-5" style={{ backgroundColor: 'var(--dash-surface)', borderColor: 'var(--dash-border)' }}>
+          <p className="text-[12px] uppercase tracking-[1px] font-normal mb-5" style={{ color: 'var(--dash-text-muted)' }}>Actividad reciente</p>
           {activity.length > 0 ? (
-            <div className="space-y-2 max-h-[300px] overflow-y-auto">
-              {activity.map((entry) => {
+            <div className="space-y-0 max-h-[320px] overflow-y-auto">
+              {activity.map((entry, i) => {
                 const appt = entry.appointments as ActivityEntry['appointments']
+                const actionColor = STATUS_DOT_COLOR[entry.new_status] || '#94A3B8'
                 return (
-                  <div key={entry.id} className="flex items-start gap-2 text-xs">
-                    <div className="mt-1 h-1.5 w-1.5 rounded-full bg-[#0891B2] flex-shrink-0" />
-                    <div>
-                      <p className="text-[#0F172A]">
+                  <div key={entry.id} className="flex items-start gap-3 py-2.5" style={i < activity.length - 1 ? { borderBottom: '0.5px solid var(--dash-border)' } : undefined}>
+                    <div className="h-[6px] w-[6px] rounded-full mt-[5px] flex-shrink-0" style={{ background: actionColor }} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[13px] truncate" style={{ color: 'var(--dash-text)' }}>
                         {String(appt?.services?.name || 'Cita')} — {String(appt?.clients?.name || 'Cliente')}
                       </p>
-                      <p className="text-[#94A3B8]">
-                        {entry.previous_status === entry.new_status
-                          ? (entry.notes || 'Reagendada')
-                          : (
-                            <>
-                              {entry.previous_status ? `${STATUS_LABELS[entry.previous_status] || entry.previous_status} → ` : ''}
-                              {STATUS_LABELS[entry.new_status] || entry.new_status}
-                            </>
-                          )
-                        }
-                        {' · '}
-                        {entry.change_source}
-                        {' · '}
-                        {format(new Date(entry.created_at), 'HH:mm')}
-                      </p>
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        <span className={`rounded-[3px] px-1.5 py-[1px] text-[9px] font-medium ${STATUS_BADGE[entry.new_status] || 'bg-[#94A3B8]/[0.08] text-[#94A3B8]'}`}>
+                          {entry.previous_status === entry.new_status
+                            ? 'Reagendada'
+                            : STATUS_LABELS[entry.new_status] || entry.new_status}
+                        </span>
+                        <span className="text-[10px] text-[#CBD5E1]">
+                          {entry.change_source} · {format(new Date(entry.created_at), 'HH:mm')}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 )
               })}
             </div>
           ) : (
-            <p className="text-sm text-[#94A3B8] text-center py-6">Sin actividad reciente</p>
+            <p className="text-[13px] text-[#94A3B8] text-center py-8">Sin actividad reciente</p>
           )}
         </div>
       </div>

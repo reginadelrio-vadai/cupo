@@ -151,7 +151,8 @@ export function CalendarView({ professionals, services }: Props) {
         <select
           value={filterProfessional}
           onChange={(e) => setFilterProfessional(e.target.value)}
-          className="h-9 rounded-md border-[0.5px] border-[#E2E8F0] bg-white px-3 text-sm text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#00B8E6]/20"
+          className="h-9 rounded-xl border-[0.5px] px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#0891B2]/20"
+          style={{ backgroundColor: 'var(--dash-surface)', borderColor: 'var(--dash-border)', color: 'var(--dash-text)' }}
         >
           <option value="">Todos los profesionales</option>
           {professionals.map((p) => (
@@ -159,7 +160,7 @@ export function CalendarView({ professionals, services }: Props) {
           ))}
         </select>
 
-        <div className="ml-auto flex items-center gap-3 text-[10px] uppercase tracking-[1px] text-[#94A3B8]">
+        <div className="ml-auto flex items-center gap-3 text-[10px] uppercase tracking-[1px]" style={{ color: 'var(--dash-text-muted)' }}>
           <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-[#0891B2]" />Confirmada</span>
           <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-[#F59E0B]" />Pago pendiente</span>
           <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-[#10B981]" />Completada</span>
@@ -167,7 +168,7 @@ export function CalendarView({ professionals, services }: Props) {
         </div>
       </div>
 
-      <div className="rounded-[10px] border-[0.5px] border-[#E2E8F0] bg-white p-4 [&_.fc]:text-sm [&_.fc-button]:!text-xs [&_.fc-button]:!rounded-lg [&_.fc-button]:!border-[#E2E8F0] [&_.fc-button]:!bg-white [&_.fc-button]:!text-[#475569] [&_.fc-button-active]:!bg-[#0891B2] [&_.fc-button-active]:!text-white [&_.fc-button-active]:!border-[#0891B2] [&_.fc-toolbar-title]:!text-base [&_.fc-toolbar-title]:!font-medium [&_.fc-event]:!rounded-md [&_.fc-event]:!border-0 [&_.fc-event]:!text-xs [&_.fc-event]:!px-1.5 [&_.fc-timegrid-slot]:!h-10 [&_.fc-col-header-cell]:!py-2 [&_.fc-col-header-cell]:!text-[10px] [&_.fc-col-header-cell]:!uppercase [&_.fc-col-header-cell]:!tracking-[1px] [&_.fc-col-header-cell]:!text-[#94A3B8] [&_.fc-col-header-cell]:!font-normal">
+      <div className="rounded-xl border-[0.5px] p-4" style={{ backgroundColor: 'var(--dash-surface)', borderColor: 'var(--dash-border)' }}>
         <FullCalendarComponent
           events={events}
           onEventClick={handleEventClick}

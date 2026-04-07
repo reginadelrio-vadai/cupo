@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { DemoForm } from '@/components/shared/demo-form'
 import {
   Calendar, MessageSquare, BarChart3, Globe, Clock, CreditCard,
   Bell, Users, Video, Webhook, ChevronDown, Check, X as XIcon,
@@ -203,7 +204,7 @@ export default function LandingPage() {
               <p className="mt-5 text-[15px] leading-[1.7] text-[#94A3B8] max-w-[440px]">El sistema de agendamiento con IA que atiende tu WhatsApp 24/7, agenda citas, cobra y te deja enfocarte en lo que importa.</p>
               <div className="mt-8 flex gap-3">
                 <Link href="/register" className="group rounded-[8px] bg-[#00B8E6] px-6 py-3 text-sm font-medium text-[#060608] transition-all duration-300 hover:bg-gradient-to-r hover:from-[#00B8E6] hover:to-[#06D6A0] active:scale-[0.97]">Empezar gratis — 14 días</Link>
-                <a href="#como-funciona" className="rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] px-6 py-3 text-sm font-medium backdrop-blur-[20px] transition-all duration-200 hover:border-[rgba(255,255,255,0.15)] active:scale-[0.97]">Ver cómo funciona</a>
+                <a href="#demo" className="rounded-[8px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] px-6 py-3 text-sm font-medium backdrop-blur-[20px] transition-all duration-200 hover:border-[rgba(255,255,255,0.15)] active:scale-[0.97]">Ver cómo funciona</a>
               </div>
               <div className="mt-10 inline-flex rounded-[10px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] backdrop-blur-[20px] p-4 gap-4">
                 <div><p className="text-[10px] uppercase tracking-[1.5px] text-[#94A3B8]">Citas esta semana</p><p className="text-[26px] font-medium tracking-[-1px]">847</p></div>
@@ -328,6 +329,12 @@ export default function LandingPage() {
         </div>
 
         <BookingFlowMockup />
+
+        <div className="text-center mt-12">
+          <a href="#demo" className="inline-flex rounded-[8px] bg-[#00B8E6] px-6 py-3 text-sm font-medium text-[#060608] transition-all duration-300 hover:bg-gradient-to-r hover:from-[#00B8E6] hover:to-[#06D6A0] active:scale-[0.97]">
+            Agendar una demo
+          </a>
+        </div>
       </section>
 
       <div className="h-px w-full" style={{ background: 'linear-gradient(90deg, transparent, rgba(8,145,178,0.3), transparent)' }} />
@@ -391,6 +398,23 @@ export default function LandingPage() {
                 <div><h4 className="text-sm font-medium">{f.title}</h4><p className="text-[13px] text-[#94A3B8] leading-[1.6] mt-0.5">{f.desc}</p></div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      <div className="h-px w-full" style={{ background: 'linear-gradient(90deg, transparent, rgba(8,145,178,0.3), transparent)' }} />
+
+      {/* ═══ DEMO FORM ═══ */}
+      <section id="demo" className="relative z-20 px-6 md:px-12 py-20 max-w-[1200px] mx-auto">
+        <div className="max-w-[480px] mx-auto">
+          <div className="text-center mb-8">
+            <h2 className="text-[28px] font-medium tracking-[-1px]">
+              <span className="bg-gradient-to-r from-[#00B8E6] to-[#06D6A0] bg-clip-text text-transparent">Agenda una demo personalizada</span>
+            </h2>
+            <p className="mt-2 text-sm text-[#94A3B8]">Te mostramos cómo cupo puede funcionar para tu negocio</p>
+          </div>
+          <div className="rounded-xl border border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.03)] backdrop-blur-[20px] p-6">
+            <DemoForm />
           </div>
         </div>
       </section>
@@ -523,7 +547,7 @@ export default function LandingPage() {
             <a href="#faq" className="hover:text-[#E2E8F0] transition-colors">FAQ</a>
             <span>Términos</span><span>Privacidad</span>
           </div>
-          <p className="text-xs text-[#475569]">Hecho con amor por VADAI desde México</p>
+          <p className="text-xs text-[#475569]">Hecho por VADAI</p>
         </div>
       </footer>
     </div>

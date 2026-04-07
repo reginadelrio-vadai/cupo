@@ -67,24 +67,25 @@ export default function FullCalendarWrapper({
       dayMaxEvents={true}
       weekends={true}
       allDaySlot={false}
-      slotMinTime="07:00:00"
-      slotMaxTime="22:00:00"
+      nowIndicator={true}
+      slotMinTime="08:00:00"
+      slotMaxTime="20:00:00"
       slotDuration="00:30:00"
+      snapDuration="00:15:00"
       height="auto"
-      contentHeight={600}
+      contentHeight={460}
+      expandRows={true}
       eventClick={onEventClick}
       select={onDateSelect}
       eventDrop={onEventDrop}
       datesSet={onDatesSet}
-      eventTimeFormat={{
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
-      }}
-      slotLabelFormat={{
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
+      eventTimeFormat={{ hour: '2-digit', minute: '2-digit', hour12: false }}
+      slotLabelFormat={{ hour: '2-digit', minute: '2-digit', hour12: false }}
+      slotLabelInterval="01:00:00"
+      dayHeaderFormat={{ weekday: 'short', day: 'numeric' }}
+      views={{
+        timeGridWeek: { titleFormat: { year: 'numeric', month: 'long' } },
+        timeGridDay: { titleFormat: { year: 'numeric', month: 'long', day: 'numeric' } },
       }}
     />
   )

@@ -29,33 +29,63 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
+
+    --dash-bg: #F8FAFC;
+    --dash-surface: #FFFFFF;
+    --dash-surface-elevated: #FFFFFF;
+    --dash-border: #E2E8F0;
+    --dash-border-subtle: #F1F5F9;
+    --dash-text: #0F172A;
+    --dash-text-secondary: #475569;
+    --dash-text-muted: #94A3B8;
+    --dash-sidebar: #FFFFFF;
+    --dash-hover: #F8FAFC;
+    --dash-nav-active: rgba(8,145,178,0.08);
+    --dash-input-bg: #FFFFFF;
+    --dash-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    --dash-glow: rgba(0,184,230,0.04);
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --background: 228 20% 7%;
+    --foreground: 214 32% 91%;
+    --card: 228 18% 12%;
+    --card-foreground: 214 32% 91%;
+    --popover: 228 18% 12%;
+    --popover-foreground: 214 32% 91%;
     --primary: 193 100% 45%;
     --primary-foreground: 220 20% 3%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --secondary: 228 16% 16%;
+    --secondary-foreground: 214 32% 91%;
+    --muted: 228 16% 16%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 228 16% 16%;
+    --accent-foreground: 214 32% 91%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
+    --border: 228 16% 18%;
+    --input: 228 16% 18%;
     --ring: 193 100% 45%;
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+
+    --dash-bg: #0F1117;
+    --dash-surface: #1A1D27;
+    --dash-surface-elevated: #22252F;
+    --dash-border: rgba(255,255,255,0.08);
+    --dash-border-subtle: rgba(255,255,255,0.04);
+    --dash-text: #E2E8F0;
+    --dash-text-secondary: #94A3B8;
+    --dash-text-muted: #64748B;
+    --dash-sidebar: #13151D;
+    --dash-hover: rgba(255,255,255,0.05);
+    --dash-nav-active: rgba(8,145,178,0.15);
+    --dash-input-bg: #1A1D27;
+    --dash-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    --dash-glow: rgba(0,184,230,0.06);
   }
 }
 
@@ -70,3 +100,99 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Smooth theme transitions */
+.theme-transition,
+.theme-transition *,
+.theme-transition *::before,
+.theme-transition *::after {
+  transition: background-color 200ms ease, border-color 200ms ease, color 200ms ease !important;
+}
+
+/* ── FullCalendar — compact Google Calendar style ── */
+
+/* Compact slot rows */
+.fc .fc-timegrid-slot { height: 28px !important; }
+.fc .fc-timegrid-slot-label { vertical-align: top !important; padding-top: 2px !important; }
+.fc .fc-timegrid-slot-label-cushion { font-size: 10px !important; color: var(--dash-text-muted) !important; }
+.fc .fc-scrollgrid { border: none !important; }
+.fc .fc-scrollgrid-section > * { border: none !important; }
+.fc td, .fc th { border-color: var(--dash-border) !important; }
+
+/* Clean header */
+.fc .fc-toolbar { margin-bottom: 12px !important; }
+.fc .fc-toolbar-title { font-size: 16px !important; font-weight: 500 !important; color: var(--dash-text) !important; }
+.fc .fc-col-header-cell { padding: 8px 0 !important; }
+.fc .fc-col-header-cell-cushion { font-size: 11px !important; font-weight: 400 !important; text-transform: uppercase !important; letter-spacing: 0.5px !important; color: var(--dash-text-muted) !important; text-decoration: none !important; }
+
+/* Buttons */
+.fc .fc-button { font-size: 12px !important; padding: 4px 10px !important; border-radius: 8px !important; border-color: var(--dash-border) !important; background-color: var(--dash-surface) !important; color: var(--dash-text-secondary) !important; box-shadow: none !important; transition: all 150ms !important; }
+.fc .fc-button:hover:not(.fc-button-active) { background-color: var(--dash-hover) !important; }
+.fc .fc-button-active { background-color: #0891B2 !important; border-color: #0891B2 !important; color: white !important; }
+.fc .fc-button-group { gap: 2px; }
+.fc .fc-today-button { text-transform: capitalize !important; }
+
+/* Events — pill-shaped, compact */
+.fc .fc-event { border-radius: 4px !important; border: none !important; font-size: 11px !important; padding: 1px 4px !important; line-height: 1.3 !important; cursor: pointer !important; }
+.fc .fc-event:hover { opacity: 0.85; }
+.fc .fc-timegrid-event { border-left: 3px solid !important; border-radius: 0 4px 4px 0 !important; }
+.fc .fc-timegrid-event .fc-event-main { padding: 1px 3px !important; }
+
+/* Today column highlight */
+.fc .fc-day-today { background-color: var(--dash-glow) !important; }
+
+/* Now indicator */
+.fc .fc-timegrid-now-indicator-line { border-color: #00B8E6 !important; border-width: 2px !important; }
+.fc .fc-timegrid-now-indicator-arrow { border-color: #00B8E6 !important; }
+
+/* Selection highlight */
+.fc .fc-highlight { background-color: rgba(8,145,178,0.08) !important; }
+
+/* Dark mode specifics */
+.dark .fc {
+  --fc-border-color: rgba(255,255,255,0.06);
+  --fc-page-bg-color: transparent;
+  --fc-neutral-bg-color: rgba(255,255,255,0.02);
+  --fc-today-bg-color: rgba(0,184,230,0.06);
+  --fc-highlight-color: rgba(8,145,178,0.12);
+  --fc-now-indicator-color: #00B8E6;
+}
+
+/* ── Dashboard dark mode overrides ──
+   Handles hardcoded Tailwind classes used in management pages */
+.dark .bg-white { background-color: var(--dash-surface) !important; }
+.dark .bg-\[\#F8FAFC\] { background-color: var(--dash-bg) !important; }
+.dark .border-\[\#E2E8F0\] { border-color: var(--dash-border) !important; }
+.dark .text-\[\#0F172A\] { color: var(--dash-text) !important; }
+.dark .text-\[\#475569\] { color: var(--dash-text-secondary) !important; }
+.dark .text-\[\#94A3B8\] { color: var(--dash-text-muted) !important; }
+.dark .hover\:bg-\[\#F8FAFC\]:hover { background-color: var(--dash-hover) !important; }
+.dark .hover\:text-\[\#0F172A\]:hover { color: var(--dash-text) !important; }
+.dark .hover\:border-\[\#CBD5E1\]:hover { border-color: rgba(255,255,255,0.12) !important; }
+
+/* Dark mode inputs/selects */
+.dark select,
+.dark input[type="date"],
+.dark input[type="time"],
+.dark input[type="number"],
+.dark input[type="text"],
+.dark input[type="email"],
+.dark input[type="tel"],
+.dark input[type="password"],
+.dark input[type="datetime-local"],
+.dark input[type="color"],
+.dark textarea {
+  background-color: var(--dash-surface) !important;
+  border-color: var(--dash-border) !important;
+  color: var(--dash-text) !important;
+}
+.dark select option {
+  background-color: #1A1D27;
+  color: #E2E8F0;
+}
+
+/* Dark mode shadcn overrides */
+.dark .border-input { border-color: var(--dash-border) !important; }
+.dark .bg-background { background-color: var(--dash-surface) !important; }
+.dark .text-foreground { color: var(--dash-text) !important; }
+.dark .placeholder\:text-muted-foreground::placeholder { color: var(--dash-text-muted) !important; }
