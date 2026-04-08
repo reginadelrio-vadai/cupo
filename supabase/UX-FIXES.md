@@ -1,5 +1,7 @@
 # Mejoras de UX y Diseño — Pendientes
 
+### DONE
+
 ## Booking Page
 - [ ] Agregar opción "Cualquier profesional disponible" como primera opción
 - [ ] Prefijo telefónico +52 en caja separada, editable, con default MX
@@ -22,3 +24,9 @@
 
 ## Dashboard (M9)
 - [ ] Actividad reciente: reagendamiento aparece como 2 entradas separadas. Debería consolidarse en una línea: "Diagnóstico — Iñigo López: Reagendada de 09:00 a 10:00 · dashboard · 17:34"
+
+
+### PENDIENTE ANTES DE LAUNCH
+
+## Pre-launch / Deploy
+- [ ] Upgrade Vercel a Pro y regresar crons a frecuencia original (expire-payments cada 5 min, reminders cada hora)

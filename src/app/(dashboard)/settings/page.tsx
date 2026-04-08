@@ -121,6 +121,25 @@ export default function SettingsPage() {
             <Input value={String(org?.email || '')} onChange={e => setOrg(prev => ({ ...prev!, email: e.target.value }))} />
           </div>
         </div>
+        <div className="space-y-1.5">
+          <Label className="text-[11px] uppercase tracking-[1.5px] text-[#94A3B8]">Color de marca</Label>
+          <div className="flex items-center gap-3">
+            <input
+              type="color"
+              value={String(org?.primary_color || '#00B8E6')}
+              onChange={e => setOrg(prev => ({ ...prev!, primary_color: e.target.value }))}
+              className="h-10 w-10 cursor-pointer rounded-lg border border-[#E2E8F0] p-0.5"
+            />
+            <Input
+              value={String(org?.primary_color || '#00B8E6')}
+              onChange={e => setOrg(prev => ({ ...prev!, primary_color: e.target.value }))}
+              className="w-28 font-mono text-sm"
+              maxLength={7}
+            />
+            <div className="flex-1 h-10 rounded-lg" style={{ background: `linear-gradient(135deg, ${String(org?.primary_color || '#00B8E6')}B0, ${String(org?.primary_color || '#00B8E6')}50)` }} />
+          </div>
+          <p className="text-[11px] text-[#94A3B8]">Se usa como fondo en tu página de reservas</p>
+        </div>
       </div>
 
       {/* Booking page settings */}
