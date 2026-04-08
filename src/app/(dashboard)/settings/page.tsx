@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
-import { Loader2, Webhook, Key, Plug, X, Check, Sparkles } from 'lucide-react'
+import { Loader2, Webhook, Key, Plug, X, Check, Sparkles, Copy, Link2 } from 'lucide-react'
 import { VALID_TIMEZONES } from '@/lib/constants'
 import { toast } from 'sonner'
 import { Toaster } from '@/components/ui/sonner'
@@ -123,24 +123,20 @@ export default function SettingsPage() {
         </div>
         <div className="space-y-1.5">
           <Label className="text-[11px] uppercase tracking-[1.5px] text-[#94A3B8]">Color de marca</Label>
-          <div className="flex items-center gap-3">
+          <label className="relative inline-block h-8 w-8 cursor-pointer rounded-lg border border-[#E2E8F0] overflow-hidden">
             <input
               type="color"
               value={String(org?.primary_color || '#00B8E6')}
               onChange={e => setOrg(prev => ({ ...prev!, primary_color: e.target.value }))}
-              className="h-10 w-10 cursor-pointer rounded-lg border border-[#E2E8F0] p-0.5"
+              className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
             />
-            <Input
-              value={String(org?.primary_color || '#00B8E6')}
-              onChange={e => setOrg(prev => ({ ...prev!, primary_color: e.target.value }))}
-              className="w-28 font-mono text-sm"
-              maxLength={7}
-            />
-            <div className="flex-1 h-10 rounded-lg" style={{ background: `linear-gradient(135deg, ${String(org?.primary_color || '#00B8E6')}B0, ${String(org?.primary_color || '#00B8E6')}50)` }} />
-          </div>
-          <p className="text-[11px] text-[#94A3B8]">Se usa como fondo en tu página de reservas</p>
+            <div className="h-full w-full rounded-[7px]" style={{ backgroundColor: String(org?.primary_color || '#00B8E6') }} />
+          </label>
         </div>
       </div>
+
+      {/* Booking link */}
+      <BookingLinkSection slug={String(org?.slug || '')} />
 
       {/* Booking page settings */}
       <div className="rounded-xl border-[0.5px] border-[#E2E8F0] bg-white p-5 space-y-4 mb-6">
@@ -169,6 +165,46 @@ export default function SettingsPage() {
         {saving ? 'Guardando...' : 'Guardar configuración'}
       </Button>
       <Toaster position="bottom-right" />
+    </div>
+  )
+}
+
+/* ── Booking Link Section ── */
+
+function BookingLinkSection({ slug }: { slug: string }) {
+  const [copied, setCopied] = useState(false)
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+  const bookingUrl = `${appUrl}/book/${slug}`
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(bookingUrl)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  if (!slug) return null
+
+  return (
+    <div className="rounded-xl border-[0.5px] border-[#E2E8F0] bg-white p-5 mb-6">
+      <div className="flex items-center gap-2 mb-3">
+        <Link2 className="h-4 w-4 text-[#0891B2]" />
+        <p className="text-[10px] uppercase tracking-[1px] text-[#94A3B8]">Link de reservas</p>
+      </div>
+      <div className="flex items-center gap-2">
+        <input
+          type="text"
+          readOnly
+          value={bookingUrl}
+          className="flex-1 h-9 rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 text-[13px] text-[#475569] font-mono select-all focus:outline-none"
+        />
+        <button
+          onClick={handleCopy}
+          className="flex items-center gap-1.5 h-9 px-3 rounded-lg border border-[#E2E8F0] bg-white text-[13px] text-[#475569] hover:bg-[#F8FAFC] transition-colors"
+        >
+          {copied ? <Check className="h-3.5 w-3.5 text-[#10B981]" /> : <Copy className="h-3.5 w-3.5" />}
+          {copied ? 'Copiado' : 'Copiar'}
+        </button>
+      </div>
     </div>
   )
 }
