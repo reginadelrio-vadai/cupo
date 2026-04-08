@@ -196,7 +196,7 @@ export function BookingFlow({ slug, services, primaryColor }: Props) {
           <button
             key={svc.id}
             onClick={() => selectService(svc)}
-            className="w-full rounded-[10px] border-[0.5px] border-[#E2E8F0] bg-[#F8FAFC] p-4 text-left transition-all duration-150 hover:border-[#CBD5E1] hover:scale-[0.99]"
+            className="w-full rounded-xl border-[0.5px] border-[#E8ECF0] bg-[#F8FAFC] p-4 text-left transition-all duration-200 hover:border-[#CBD5E1] hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
           >
             <div className="flex items-center justify-between">
               <div>
@@ -236,7 +236,7 @@ export function BookingFlow({ slug, services, primaryColor }: Props) {
             {/* "Any professional" option */}
             <button
               onClick={() => selectProfessional(ANY_PROFESSIONAL)}
-              className="w-full rounded-[10px] border-[0.5px] border-[#E2E8F0] bg-[#F8FAFC] p-4 text-left transition-all duration-150 hover:border-[#CBD5E1] hover:scale-[0.99]"
+              className="w-full rounded-xl border-[0.5px] border-[#E8ECF0] bg-[#F8FAFC] p-4 text-left transition-all duration-200 hover:border-[#CBD5E1] hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
             >
               <div className="flex items-center gap-3">
                 <div className="flex h-9 w-9 items-center justify-center rounded-[7px] bg-[#E2E8F0]">
@@ -252,7 +252,7 @@ export function BookingFlow({ slug, services, primaryColor }: Props) {
               <button
                 key={prof.id}
                 onClick={() => selectProfessional(prof)}
-                className="w-full rounded-[10px] border-[0.5px] border-[#E2E8F0] bg-[#F8FAFC] p-4 text-left transition-all duration-150 hover:border-[#CBD5E1] hover:scale-[0.99]"
+                className="w-full rounded-xl border-[0.5px] border-[#E8ECF0] bg-[#F8FAFC] p-4 text-left transition-all duration-200 hover:border-[#CBD5E1] hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
               >
                 <div className="flex items-center gap-3">
                   <div
@@ -390,7 +390,7 @@ export function BookingFlow({ slug, services, primaryColor }: Props) {
         {BackButton}
         <h2 className="text-base font-medium text-[#0F172A]">Confirmar reserva</h2>
 
-        <div className="rounded-[10px] border-[0.5px] border-[#E2E8F0] bg-[#F8FAFC] p-4 space-y-3">
+        <div className="rounded-xl border-[0.5px] border-[#E8ECF0] bg-[#F8FAFC] p-4 space-y-3">
           <div className="flex items-center gap-2 text-sm">
             <CalendarIcon className="h-4 w-4 text-[#94A3B8]" />
             <span className="text-[#0F172A]">{format(slotDate, "EEEE d 'de' MMMM, HH:mm", { locale: es })}</span>
@@ -413,7 +413,7 @@ export function BookingFlow({ slug, services, primaryColor }: Props) {
           )}
         </div>
 
-        <div className="rounded-[10px] border-[0.5px] border-[#E2E8F0] bg-[#F8FAFC] p-4 space-y-1">
+        <div className="rounded-xl border-[0.5px] border-[#E8ECF0] bg-[#F8FAFC] p-4 space-y-1">
           <p className="text-sm font-medium text-[#0F172A]">{clientName}</p>
           <p className="text-xs text-[#94A3B8]">{fullPhone}</p>
           {clientEmail && <p className="text-xs text-[#94A3B8]">{clientEmail}</p>}
@@ -443,7 +443,7 @@ export function BookingFlow({ slug, services, primaryColor }: Props) {
           <Check className="h-8 w-8" style={{ color: primaryColor }} />
         </div>
         <h2 className="text-xl font-medium text-[#0F172A]">¡Reserva confirmada!</h2>
-        <div className="rounded-[10px] border-[0.5px] border-[#E2E8F0] bg-[#F8FAFC] p-4 text-left space-y-2">
+        <div className="rounded-xl border-[0.5px] border-[#E8ECF0] bg-[#F8FAFC] p-4 text-left space-y-2">
           <p className="text-sm text-[#0F172A]">
             <strong>{selectedService?.name}</strong> con {displayProfName}
           </p>

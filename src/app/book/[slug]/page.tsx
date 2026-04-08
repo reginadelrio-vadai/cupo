@@ -27,35 +27,59 @@ export default async function BookingPage({ params }: Props) {
   const primaryColor = resolved.config.primary_color ?? resolved.org.primary_color
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="mx-auto max-w-[520px] px-4 py-8">
+    <div className="min-h-screen relative" style={{ background: `linear-gradient(160deg, ${primaryColor}B0 0%, ${primaryColor}80 40%, ${primaryColor}50 70%, ${primaryColor}30 100%)` }}>
+      {/* Diffused radial blobs for depth */}
+      <div className="pointer-events-none absolute -top-20 -left-20 w-[600px] h-[600px] rounded-full" style={{ background: `radial-gradient(circle, ${primaryColor}60, transparent 65%)`, filter: 'blur(80px)' }} />
+      <div className="pointer-events-none absolute bottom-0 right-0 w-[500px] h-[500px] rounded-full" style={{ background: `radial-gradient(circle, ${primaryColor}30, transparent 65%)`, filter: 'blur(60px)' }} />
+      {/* Grain texture overlay */}
+      <div className="pointer-events-none fixed inset-0 z-[1] opacity-[0.35] mix-blend-overlay">
+        <svg width="100%" height="100%"><filter id="bg"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" /></filter><rect width="100%" height="100%" filter="url(#bg)" /></svg>
+      </div>
+
+      <div className="relative z-[2] mx-auto max-w-[520px] px-4 pt-12 pb-16">
         {/* Header */}
-        <div className="flex items-center gap-3 mb-6">
+        <div className="flex items-center gap-3.5 mb-8">
           {logo ? (
-            <img src={logo} alt={resolved.org.name} className="h-10 w-10 rounded-lg object-cover" />
+            <img src={logo} alt={resolved.org.name} className="h-12 w-12 rounded-xl object-cover shadow-md" />
           ) : (
             <div
-              className="h-10 w-10 rounded-lg flex items-center justify-center"
+              className="h-12 w-12 rounded-xl flex items-center justify-center shadow-md"
               style={{ background: primaryColor }}
             >
-              <span className="text-sm font-medium text-white">
+              <span className="text-base font-medium text-white">
                 {resolved.org.name[0]?.toUpperCase()}
               </span>
             </div>
           )}
           <div>
-            <h1 className="text-lg font-medium text-[#0F172A]">{resolved.org.name}</h1>
+            <h1 className="text-[18px] font-medium text-white">{resolved.org.name}</h1>
             {resolved.config.welcome_message && (
-              <p className="text-sm text-[#475569]">{resolved.config.welcome_message}</p>
+              <p className="text-[13px] text-white/70 mt-0.5">{resolved.config.welcome_message}</p>
             )}
           </div>
         </div>
 
-        <BookingFlow
-          slug={params.slug}
-          services={services || []}
-          primaryColor={primaryColor}
-        />
+        {/* Booking flow card */}
+        <div className="rounded-2xl bg-white p-6 shadow-[0_4px_24px_rgba(0,0,0,0.08),0_1px_2px_rgba(0,0,0,0.04)]">
+          <BookingFlow
+            slug={params.slug}
+            services={services || []}
+            primaryColor={primaryColor}
+          />
+        </div>
+
+        {/* Powered by cupo */}
+        <div className="mt-10 text-center">
+          <a href="https://cupo.app" className="inline-flex items-center gap-2 text-[12px] text-[#0F172A] hover:text-[#1E293B] transition-colors">
+            <span>Powered by</span>
+            <span className="flex items-center gap-1">
+              <span className="inline-flex h-[14px] w-[14px] rounded-[3px] bg-[#0F172A] items-center justify-center">
+                <span className="h-[4px] w-[4px] rounded-full bg-white" />
+              </span>
+              <span className="font-medium tracking-[0.3px] text-[#0F172A]">cupo</span>
+            </span>
+          </a>
+        </div>
       </div>
     </div>
   )
