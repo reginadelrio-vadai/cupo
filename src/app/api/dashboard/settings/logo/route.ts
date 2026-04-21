@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { handleApiError, AppError } from '@/lib/errors'
@@ -16,9 +17,18 @@ function extFromType(type: string): string {
 
 async function ensureBucket(admin: ReturnType<typeof createSupabaseAdminClient>) {
   const { data: buckets } = await admin.storage.listBuckets()
-  const exists = buckets?.some(b => b.name === LOGOS_BUCKET)
-  if (!exists) {
+  const existing = buckets?.find(b => b.name === LOGOS_BUCKET)
+  if (!existing) {
     await admin.storage.createBucket(LOGOS_BUCKET, {
+      public: true,
+      fileSizeLimit: MAX_SIZE,
+      allowedMimeTypes: ALLOWED_TYPES,
+    })
+    return
+  }
+  // Bucket already exists — make sure it's public so getPublicUrl works.
+  if (!existing.public) {
+    await admin.storage.updateBucket(LOGOS_BUCKET, {
       public: true,
       fileSizeLimit: MAX_SIZE,
       allowedMimeTypes: ALLOWED_TYPES,
@@ -81,11 +91,18 @@ export async function POST(request: NextRequest) {
     const { data: urlData } = admin.storage.from(LOGOS_BUCKET).getPublicUrl(path)
     const logoUrl = `${urlData.publicUrl}?v=${Date.now()}`
 
-    const { error: updateError } = await admin
+    const { data: orgData, error: updateError } = await admin
       .from('organizations')
       .update({ logo_url: logoUrl })
       .eq('id', orgId)
+      .select('slug')
+      .single()
     if (updateError) throw updateError
+
+    // Clear any cached render of the booking page so the new logo shows up.
+    if (orgData?.slug) {
+      try { revalidatePath(`/book/${orgData.slug}`) } catch { /* noop */ }
+    }
 
     return NextResponse.json({ data: { logo_url: logoUrl } })
   } catch (error) {

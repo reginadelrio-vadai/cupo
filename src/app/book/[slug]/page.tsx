@@ -4,6 +4,9 @@ import { resolveOrg } from '@/lib/booking/resolve-org'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { BookingFlow } from '@/components/booking/booking-flow'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 interface Props {
   params: { slug: string }
 }
@@ -23,7 +26,7 @@ export default async function BookingPage({ params }: Props) {
     .eq('is_active', true)
     .order('sort_order')
 
-  const logo = resolved.config.logo_url ?? resolved.org.logo_url
+  const logo = resolved.config.logo_url || resolved.org.logo_url || null
   const primaryColor = resolved.config.primary_color ?? resolved.org.primary_color
 
   return (
