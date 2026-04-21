@@ -58,23 +58,25 @@ export default async function BookingPage({ params }: Props) {
 
       <div className="relative z-[2] mx-auto max-w-[520px] px-4 pt-12 pb-16">
         {/* Header */}
-        <div className="flex flex-col items-center text-center mb-8">
-          {logo ? (
-            <>
-              <img
-                src={logo}
-                alt={resolved.org.name}
-                className="h-28 max-h-28 w-auto max-w-[280px] object-contain"
-              />
-              {showName && (
-                <h1 className="mt-4 text-[20px] font-medium text-white">{resolved.org.name}</h1>
-              )}
-            </>
-          ) : (
-            <h1 className="text-[24px] font-medium text-white tracking-[-0.5px]">{resolved.org.name}</h1>
-          )}
+        <div className="mb-8 flex flex-col items-center text-center">
+          <div className="flex flex-row items-center justify-center gap-4">
+            {logo ? (
+              <>
+                <img
+                  src={logo}
+                  alt={resolved.org.name}
+                  className="h-28 max-h-28 w-auto max-w-[280px] object-contain"
+                />
+                {showName && (
+                  <h1 className="text-[22px] font-medium text-white tracking-[-0.3px]">{resolved.org.name}</h1>
+                )}
+              </>
+            ) : (
+              <h1 className="text-[24px] font-medium text-white tracking-[-0.5px]">{resolved.org.name}</h1>
+            )}
+          </div>
           {resolved.config.welcome_message && (
-            <p className="mt-2 text-[13px] text-white/75 max-w-[400px]">{resolved.config.welcome_message}</p>
+            <p className="mt-3 text-[13px] text-white/75 max-w-[400px]">{resolved.config.welcome_message}</p>
           )}
         </div>
 
