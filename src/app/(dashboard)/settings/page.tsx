@@ -121,8 +121,8 @@ export default function SettingsPage() {
             <Input value={String(org?.email || '')} onChange={e => setOrg(prev => ({ ...prev!, email: e.target.value }))} />
           </div>
         </div>
-        <div className="space-y-1.5">
-          <Label className="text-[11px] uppercase tracking-[1.5px] text-[#94A3B8]">Color de marca</Label>
+        <div className="flex items-center gap-3">
+          <Label className="text-[11px] uppercase tracking-[1.5px] text-[#94A3B8] m-0">Color de marca</Label>
           <label className="relative inline-block h-8 w-8 cursor-pointer rounded-lg border border-[#E2E8F0] overflow-hidden">
             <input
               type="color"

@@ -37,10 +37,23 @@ export async function PATCH(request: NextRequest) {
 
     const body = await request.json()
 
-    // Mirror the branding fields to booking_page_config so the booking page
-    // reflects the new values (booking page reads config.* with org.* fallback,
-    // and onboarding may have pinned config.primary_color / config.logo_url).
+    // Build the booking_page_config mirror. IMPORTANT: the client echoes the
+    // whole `bookingConfig` row back (including stale primary_color/logo_url
+    // that the UI never edits), so we must apply those non-editable fields
+    // from the `organization` object LAST to avoid reintroducing stale values.
     const configMirror: Record<string, unknown> = {}
+
+    if (body.bookingConfig) {
+      const editableInBookingConfig = [
+        'is_active',
+        'welcome_message',
+        'min_advance_hours',
+        'max_advance_days',
+      ]
+      for (const key of editableInBookingConfig) {
+        if (body.bookingConfig[key] !== undefined) configMirror[key] = body.bookingConfig[key]
+      }
+    }
 
     if (body.organization) {
       const allowed = ['name', 'primary_color', 'timezone', 'phone', 'email', 'address', 'logo_url']
@@ -51,15 +64,11 @@ export async function PATCH(request: NextRequest) {
       if (Object.keys(updates).length) {
         await supabase.from('organizations').update(updates).eq('id', orgId)
       }
+      // Mirror branding to booking_page_config so the booking page reflects
+      // the new values (onboarding may have pinned config.primary_color /
+      // config.logo_url, which would otherwise shadow the org value forever).
       if (updates.primary_color !== undefined) configMirror.primary_color = updates.primary_color
       if (updates.logo_url !== undefined) configMirror.logo_url = updates.logo_url
-    }
-
-    if (body.bookingConfig) {
-      const allowed = ['is_active', 'welcome_message', 'min_advance_hours', 'max_advance_days', 'primary_color', 'logo_url']
-      for (const key of allowed) {
-        if (body.bookingConfig[key] !== undefined) configMirror[key] = body.bookingConfig[key]
-      }
     }
 
     if (Object.keys(configMirror).length) {
