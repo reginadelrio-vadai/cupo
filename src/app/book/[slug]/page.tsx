@@ -43,7 +43,11 @@ export default async function BookingPage({ params }: Props) {
         {/* Header */}
         <div className="flex items-center gap-3.5 mb-8">
           {logo ? (
-            <img src={logo} alt={resolved.org.name} className="h-12 w-12 rounded-xl object-cover shadow-md" />
+            <img
+              src={logo}
+              alt={resolved.org.name}
+              className="h-14 max-h-14 w-auto max-w-[180px] object-contain"
+            />
           ) : (
             <div
               className="h-12 w-12 rounded-xl flex items-center justify-center shadow-md"

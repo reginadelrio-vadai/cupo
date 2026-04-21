@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { handleApiError, AppError } from '@/lib/errors'
 
@@ -36,6 +37,11 @@ export async function PATCH(request: NextRequest) {
 
     const body = await request.json()
 
+    // Mirror the branding fields to booking_page_config so the booking page
+    // reflects the new values (booking page reads config.* with org.* fallback,
+    // and onboarding may have pinned config.primary_color / config.logo_url).
+    const configMirror: Record<string, unknown> = {}
+
     if (body.organization) {
       const allowed = ['name', 'primary_color', 'timezone', 'phone', 'email', 'address', 'logo_url']
       const updates: Record<string, unknown> = {}
@@ -45,17 +51,29 @@ export async function PATCH(request: NextRequest) {
       if (Object.keys(updates).length) {
         await supabase.from('organizations').update(updates).eq('id', orgId)
       }
+      if (updates.primary_color !== undefined) configMirror.primary_color = updates.primary_color
+      if (updates.logo_url !== undefined) configMirror.logo_url = updates.logo_url
     }
 
     if (body.bookingConfig) {
       const allowed = ['is_active', 'welcome_message', 'min_advance_hours', 'max_advance_days', 'primary_color', 'logo_url']
-      const updates: Record<string, unknown> = {}
       for (const key of allowed) {
-        if (body.bookingConfig[key] !== undefined) updates[key] = body.bookingConfig[key]
+        if (body.bookingConfig[key] !== undefined) configMirror[key] = body.bookingConfig[key]
       }
-      if (Object.keys(updates).length) {
-        await supabase.from('booking_page_config').update(updates).eq('organization_id', orgId)
-      }
+    }
+
+    if (Object.keys(configMirror).length) {
+      await supabase.from('booking_page_config').update(configMirror).eq('organization_id', orgId)
+    }
+
+    // Invalidate the booking page cache so branding changes are visible.
+    const { data: orgRow } = await supabase
+      .from('organizations')
+      .select('slug')
+      .eq('id', orgId)
+      .single()
+    if (orgRow?.slug) {
+      try { revalidatePath(`/book/${orgRow.slug}`) } catch { /* noop */ }
     }
 
     return NextResponse.json({ data: { updated: true } })

@@ -99,6 +99,14 @@ export async function POST(request: NextRequest) {
       .single()
     if (updateError) throw updateError
 
+    // Mirror to booking_page_config so the booking page reflects the new logo
+    // (booking page reads config.logo_url with org.logo_url fallback, and
+    // onboarding may have pinned config.logo_url to an older value).
+    await admin
+      .from('booking_page_config')
+      .update({ logo_url: logoUrl })
+      .eq('organization_id', orgId)
+
     // Clear any cached render of the booking page so the new logo shows up.
     if (orgData?.slug) {
       try { revalidatePath(`/book/${orgData.slug}`) } catch { /* noop */ }
