@@ -65,7 +65,7 @@ export default async function BookingPage({ params }: Props) {
                 <img
                   src={logo}
                   alt={resolved.org.name}
-                  className="h-36 max-h-36 w-auto max-w-[320px] object-contain"
+                  className="h-20 max-h-20 w-auto max-w-[200px] object-contain"
                 />
                 {showName && (
                   <h1 className="text-[22px] font-medium text-white tracking-[-0.3px]">{resolved.org.name}</h1>
