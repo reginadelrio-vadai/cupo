@@ -58,14 +58,14 @@ export default async function BookingPage({ params }: Props) {
 
       <div className="relative z-[2] mx-auto max-w-[520px] px-4 pt-12 pb-16">
         {/* Header */}
-        <div className="mb-8 flex flex-col items-center text-center">
+        <div className="mb-4 flex flex-col items-center text-center">
           <div className="flex flex-row items-center justify-center gap-4">
             {logo ? (
               <>
                 <img
                   src={logo}
                   alt={resolved.org.name}
-                  className="h-28 max-h-28 w-auto max-w-[280px] object-contain"
+                  className="h-36 max-h-36 w-auto max-w-[320px] object-contain"
                 />
                 {showName && (
                   <h1 className="text-[22px] font-medium text-white tracking-[-0.3px]">{resolved.org.name}</h1>
