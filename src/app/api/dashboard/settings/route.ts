@@ -49,6 +49,7 @@ export async function PATCH(request: NextRequest) {
         'welcome_message',
         'min_advance_hours',
         'max_advance_days',
+        'show_name_on_booking',
       ]
       for (const key of editableInBookingConfig) {
         if (body.bookingConfig[key] !== undefined) configMirror[key] = body.bookingConfig[key]

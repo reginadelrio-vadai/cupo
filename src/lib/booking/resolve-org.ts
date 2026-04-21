@@ -20,6 +20,7 @@ interface ResolvedOrg {
     welcome_message: string | null
     min_advance_hours: number
     max_advance_days: number
+    show_name_on_booking: boolean
   }
 }
 
@@ -37,7 +38,7 @@ export async function resolveOrg(slug: string): Promise<ResolvedOrg | null> {
 
   const { data: config } = await supabase
     .from('booking_page_config')
-    .select('is_active, logo_url, primary_color, welcome_message, min_advance_hours, max_advance_days')
+    .select('is_active, logo_url, primary_color, welcome_message, min_advance_hours, max_advance_days, show_name_on_booking')
     .eq('organization_id', org.id)
     .single()
 

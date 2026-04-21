@@ -28,48 +28,49 @@ export default async function BookingPage({ params }: Props) {
 
   const logo = resolved.config.logo_url || resolved.org.logo_url || null
   const primaryColor = resolved.config.primary_color ?? resolved.org.primary_color
+  const showName = resolved.config.show_name_on_booking ?? true
 
   return (
     <div
       className="min-h-screen relative"
       style={{
+        // Solid saturated base so the color is unmistakable.
         backgroundColor: primaryColor,
-        backgroundImage: `linear-gradient(160deg, ${primaryColor} 0%, ${primaryColor} 70%, ${primaryColor}D9 100%)`,
+        // Subtle light→shadow depth wash painted on top of the base color
+        // (white at the top, darker at the bottom) — keeps the brand color
+        // dominant but gives a frosted-gradient feel rather than a flat block.
+        backgroundImage: `linear-gradient(160deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.04) 40%, rgba(0,0,0,0.12) 100%)`,
       }}
     >
-      {/* Diffused radial blobs for depth (subtle highlights, no wash-out) */}
-      <div className="pointer-events-none absolute -top-20 -left-20 w-[600px] h-[600px] rounded-full" style={{ background: `radial-gradient(circle, rgba(255,255,255,0.18), transparent 65%)`, filter: 'blur(80px)' }} />
-      <div className="pointer-events-none absolute bottom-0 right-0 w-[500px] h-[500px] rounded-full" style={{ background: `radial-gradient(circle, rgba(0,0,0,0.12), transparent 65%)`, filter: 'blur(60px)' }} />
+      {/* Diffused radial blobs for depth: a bright tint + a soft shadow + a warm brand-color glow */}
+      <div className="pointer-events-none absolute -top-24 -left-24 w-[620px] h-[620px] rounded-full" style={{ background: `radial-gradient(circle, rgba(255,255,255,0.28), transparent 65%)`, filter: 'blur(90px)' }} />
+      <div className="pointer-events-none absolute top-1/3 -right-32 w-[520px] h-[520px] rounded-full" style={{ background: `radial-gradient(circle, ${primaryColor} 0%, transparent 65%)`, mixBlendMode: 'screen', filter: 'blur(90px)' }} />
+      <div className="pointer-events-none absolute bottom-0 right-0 w-[560px] h-[560px] rounded-full" style={{ background: `radial-gradient(circle, rgba(0,0,0,0.22), transparent 65%)`, filter: 'blur(80px)' }} />
       {/* Grain texture overlay */}
-      <div className="pointer-events-none fixed inset-0 z-[1] opacity-[0.18] mix-blend-overlay">
+      <div className="pointer-events-none fixed inset-0 z-[1] opacity-[0.25] mix-blend-overlay">
         <svg width="100%" height="100%"><filter id="bg"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" /></filter><rect width="100%" height="100%" filter="url(#bg)" /></svg>
       </div>
 
       <div className="relative z-[2] mx-auto max-w-[520px] px-4 pt-12 pb-16">
         {/* Header */}
-        <div className="flex items-center gap-3.5 mb-8">
+        <div className="flex flex-col items-center text-center mb-8">
           {logo ? (
-            <img
-              src={logo}
-              alt={resolved.org.name}
-              className="h-28 max-h-28 w-auto max-w-[280px] object-contain"
-            />
+            <>
+              <img
+                src={logo}
+                alt={resolved.org.name}
+                className="h-28 max-h-28 w-auto max-w-[280px] object-contain"
+              />
+              {showName && (
+                <h1 className="mt-4 text-[20px] font-medium text-white">{resolved.org.name}</h1>
+              )}
+            </>
           ) : (
-            <div
-              className="h-12 w-12 rounded-xl flex items-center justify-center shadow-md"
-              style={{ background: primaryColor }}
-            >
-              <span className="text-base font-medium text-white">
-                {resolved.org.name[0]?.toUpperCase()}
-              </span>
-            </div>
+            <h1 className="text-[24px] font-medium text-white tracking-[-0.5px]">{resolved.org.name}</h1>
           )}
-          <div>
-            <h1 className="text-[18px] font-medium text-white">{resolved.org.name}</h1>
-            {resolved.config.welcome_message && (
-              <p className="text-[13px] text-white/70 mt-0.5">{resolved.config.welcome_message}</p>
-            )}
-          </div>
+          {resolved.config.welcome_message && (
+            <p className="mt-2 text-[13px] text-white/75 max-w-[400px]">{resolved.config.welcome_message}</p>
+          )}
         </div>
 
         {/* Booking flow card */}

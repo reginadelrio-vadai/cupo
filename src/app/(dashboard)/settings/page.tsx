@@ -152,6 +152,16 @@ export default function SettingsPage() {
           <Label className="text-sm text-[#475569]">Página activa</Label>
           <Switch checked={!!config?.is_active} onCheckedChange={v => setConfig(prev => ({ ...prev!, is_active: v }))} />
         </div>
+        <div className="flex items-center justify-between">
+          <div>
+            <Label className="text-sm text-[#475569]">Mostrar nombre en página de reservas</Label>
+            <p className="text-[11px] text-[#94A3B8] mt-0.5">Útil ocultarlo si tu logo ya contiene el nombre</p>
+          </div>
+          <Switch
+            checked={config?.show_name_on_booking !== false}
+            onCheckedChange={v => setConfig(prev => ({ ...prev!, show_name_on_booking: v }))}
+          />
+        </div>
         <div className="space-y-1.5">
           <Label className="text-[11px] uppercase tracking-[1.5px] text-[#94A3B8]">Mensaje de bienvenida</Label>
           <Input value={String(config?.welcome_message || '')} onChange={e => setConfig(prev => ({ ...prev!, welcome_message: e.target.value }))} placeholder="Bienvenido a nuestro negocio" />
