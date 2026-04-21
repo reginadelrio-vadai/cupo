@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
-import { Loader2, Webhook, Key, Plug, X, Check, Sparkles, Copy, Link2 } from 'lucide-react'
+import { Loader2, Webhook, Key, Plug, X, Check, Sparkles, Copy, Link2, Upload, Image as ImageIcon } from 'lucide-react'
 import { VALID_TIMEZONES } from '@/lib/constants'
 import { toast } from 'sonner'
 import { Toaster } from '@/components/ui/sonner'
@@ -135,6 +135,13 @@ export default function SettingsPage() {
         </div>
       </div>
 
+      {/* Logo upload */}
+      <LogoUploadSection
+        logoUrl={(org?.logo_url as string) || null}
+        orgName={String(org?.name || '')}
+        onUploaded={(url) => setOrg(prev => ({ ...prev!, logo_url: url }))}
+      />
+
       {/* Booking link */}
       <BookingLinkSection slug={String(org?.slug || '')} />
 
@@ -169,12 +176,119 @@ export default function SettingsPage() {
   )
 }
 
+/* ── Logo Upload Section ── */
+
+const MAX_LOGO_SIZE = 2 * 1024 * 1024 // 2MB
+const ALLOWED_LOGO_TYPES = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml']
+
+function LogoUploadSection({
+  logoUrl,
+  orgName,
+  onUploaded,
+}: {
+  logoUrl: string | null
+  orgName: string
+  onUploaded: (url: string) => void
+}) {
+  const [uploading, setUploading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    setError(null)
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (!ALLOWED_LOGO_TYPES.includes(file.type)) {
+      setError('Formato no soportado. Usa PNG, JPG o SVG.')
+      e.target.value = ''
+      return
+    }
+    if (file.size > MAX_LOGO_SIZE) {
+      setError('El archivo supera el máximo de 2MB.')
+      e.target.value = ''
+      return
+    }
+
+    setUploading(true)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      const res = await fetch('/api/dashboard/settings/logo', {
+        method: 'POST',
+        body: formData,
+      })
+      const json = await res.json()
+      if (!res.ok) {
+        setError(json?.message || 'Error al subir el logo')
+      } else {
+        onUploaded(json.data.logo_url)
+        toast.success('Logo actualizado')
+      }
+    } catch {
+      setError('Error de red al subir')
+    } finally {
+      setUploading(false)
+      e.target.value = ''
+    }
+  }
+
+  return (
+    <div className="rounded-xl border-[0.5px] border-[#E2E8F0] bg-white p-5 mb-6">
+      <div className="flex items-center gap-2 mb-3">
+        <ImageIcon className="h-4 w-4 text-[#0891B2]" />
+        <p className="text-[10px] uppercase tracking-[1px] text-[#94A3B8]">Logo de tu empresa</p>
+      </div>
+      <div className="flex items-center gap-4">
+        <div
+          className="h-[120px] w-[120px] rounded-xl border-[0.5px] border-[#E2E8F0] bg-[#F8FAFC] flex items-center justify-center overflow-hidden flex-shrink-0"
+        >
+          {logoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={logoUrl} alt="Logo" className="h-full w-full object-contain" />
+          ) : (
+            <span className="text-[28px] font-medium text-[#94A3B8]">
+              {orgName[0]?.toUpperCase() || '?'}
+            </span>
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <label className="inline-flex items-center gap-2 h-9 px-3 rounded-lg border border-[#E2E8F0] bg-white text-[13px] text-[#475569] hover:bg-[#F8FAFC] transition-colors cursor-pointer">
+            {uploading ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Upload className="h-3.5 w-3.5" />
+            )}
+            {uploading ? 'Subiendo...' : logoUrl ? 'Cambiar logo' : 'Subir logo'}
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/svg+xml"
+              className="hidden"
+              onChange={handleFileChange}
+              disabled={uploading}
+            />
+          </label>
+          <p className="mt-2 text-[11px] text-[#94A3B8]">PNG, JPG o SVG. Máximo 2MB.</p>
+          {error && <p className="mt-2 text-[12px] text-[#EF4444]">{error}</p>}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 /* ── Booking Link Section ── */
 
 function BookingLinkSection({ slug }: { slug: string }) {
   const [copied, setCopied] = useState(false)
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-  const bookingUrl = `${appUrl}/book/${slug}`
+  const [bookingUrl, setBookingUrl] = useState('')
+
+  useEffect(() => {
+    if (!slug) return
+    const envUrl = process.env.NEXT_PUBLIC_APP_URL
+    const base = envUrl && !envUrl.includes('localhost')
+      ? envUrl
+      : (typeof window !== 'undefined' ? window.location.origin : envUrl || '')
+    setBookingUrl(`${base}/book/${slug}`)
+  }, [slug])
 
   const handleCopy = () => {
     navigator.clipboard.writeText(bookingUrl)

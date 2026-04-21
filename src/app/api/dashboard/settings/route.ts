@@ -37,7 +37,7 @@ export async function PATCH(request: NextRequest) {
     const body = await request.json()
 
     if (body.organization) {
-      const allowed = ['name', 'primary_color', 'timezone', 'phone', 'email', 'address']
+      const allowed = ['name', 'primary_color', 'timezone', 'phone', 'email', 'address', 'logo_url']
       const updates: Record<string, unknown> = {}
       for (const key of allowed) {
         if (body.organization[key] !== undefined) updates[key] = body.organization[key]
