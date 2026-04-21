@@ -36,10 +36,15 @@ export default async function BookingPage({ params }: Props) {
       style={{
         // Solid saturated base so the color is unmistakable.
         backgroundColor: primaryColor,
-        // Subtle light→shadow depth wash painted on top of the base color
-        // (white at the top, darker at the bottom) — keeps the brand color
-        // dominant but gives a frosted-gradient feel rather than a flat block.
-        backgroundImage: `linear-gradient(160deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.04) 40%, rgba(0,0,0,0.12) 100%)`,
+        // Stacked overlays (top layer first):
+        //   1) Diagonal fade to white in the bottom-right — keeps brand color
+        //      clearly dominant for the first 65% then eases to pure white
+        //      at the bottom-right corner for depth and card contrast.
+        //   2) Subtle light→shadow wash for frosted-gradient depth.
+        backgroundImage: `
+          linear-gradient(160deg, transparent 0%, transparent 65%, rgba(255,255,255,0.5) 85%, #FFFFFF 100%),
+          linear-gradient(160deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.04) 40%, rgba(0,0,0,0.12) 100%)
+        `,
       }}
     >
       {/* Diffused radial blobs for depth: a bright tint + a soft shadow + a warm brand-color glow */}
