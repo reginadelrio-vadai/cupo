@@ -30,12 +30,18 @@ export default async function BookingPage({ params }: Props) {
   const primaryColor = resolved.config.primary_color ?? resolved.org.primary_color
 
   return (
-    <div className="min-h-screen relative" style={{ background: `linear-gradient(160deg, ${primaryColor}B0 0%, ${primaryColor}80 40%, ${primaryColor}50 70%, ${primaryColor}30 100%)` }}>
-      {/* Diffused radial blobs for depth */}
-      <div className="pointer-events-none absolute -top-20 -left-20 w-[600px] h-[600px] rounded-full" style={{ background: `radial-gradient(circle, ${primaryColor}60, transparent 65%)`, filter: 'blur(80px)' }} />
-      <div className="pointer-events-none absolute bottom-0 right-0 w-[500px] h-[500px] rounded-full" style={{ background: `radial-gradient(circle, ${primaryColor}30, transparent 65%)`, filter: 'blur(60px)' }} />
+    <div
+      className="min-h-screen relative"
+      style={{
+        backgroundColor: primaryColor,
+        backgroundImage: `linear-gradient(160deg, ${primaryColor} 0%, ${primaryColor} 70%, ${primaryColor}D9 100%)`,
+      }}
+    >
+      {/* Diffused radial blobs for depth (subtle highlights, no wash-out) */}
+      <div className="pointer-events-none absolute -top-20 -left-20 w-[600px] h-[600px] rounded-full" style={{ background: `radial-gradient(circle, rgba(255,255,255,0.18), transparent 65%)`, filter: 'blur(80px)' }} />
+      <div className="pointer-events-none absolute bottom-0 right-0 w-[500px] h-[500px] rounded-full" style={{ background: `radial-gradient(circle, rgba(0,0,0,0.12), transparent 65%)`, filter: 'blur(60px)' }} />
       {/* Grain texture overlay */}
-      <div className="pointer-events-none fixed inset-0 z-[1] opacity-[0.35] mix-blend-overlay">
+      <div className="pointer-events-none fixed inset-0 z-[1] opacity-[0.18] mix-blend-overlay">
         <svg width="100%" height="100%"><filter id="bg"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" /></filter><rect width="100%" height="100%" filter="url(#bg)" /></svg>
       </div>
 
@@ -46,7 +52,7 @@ export default async function BookingPage({ params }: Props) {
             <img
               src={logo}
               alt={resolved.org.name}
-              className="h-20 max-h-20 w-auto max-w-[220px] object-contain"
+              className="h-28 max-h-28 w-auto max-w-[280px] object-contain"
             />
           ) : (
             <div
